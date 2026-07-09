@@ -1,70 +1,45 @@
-# Sync .project/sourceTexts/ folder (source text files)
-
-# Don't sync user-specific SQLite databases
-.project/*.sqlite
-.idea
-.dart_tool
-.project
-.vscode
-assets
-android
-ios
-linux
-macos
-web
-windows
-build
-pubspec.yaml
-.env
-flutter_chat_specification.md
-flutter_dashboard_specification.md
-flutter_integration_guide.md
-flutter_project_task_specification.md
-team_manager.md
-# Don't sync SQLite auxiliary files
-.project/*.sqlite-wal
-.project/*.sqlite-shm
-
-# Don't sync temporary files
-.project/.temp/**
-
-# Don't sync user-specific files
-.project/complete_drafts.txt
-.project/localProjectSettings.json
-.project/localProjectSwap.json
-copilot-messages.log
-
-# Archive formats
-*.zip
-*.rar
-*.7z
-*.tar
-*.tar.gz
-*.tar.bz2
-*.tar.xz
-*.gz
-*.bz2
-*.xz
-
-# Windows executables and installers
-*.exe
-*.msi
-*.bat
-*.cmd
-*.com
-*.scr
-*.dll
-
-# macOS executables and disk images
-*.dmg
-*.pkg
-
-# Disk images and virtual machine files
-*.iso
-*.img
-*.vhd
-*.vmdk
-
-# System files
+# Miscellaneous
+*.class
+*.log
+*.pyc
+*.swp
 .DS_Store
-.project/attachments/files/**
+.atom/
+.build/
+.buildlog/
+.history
+.svn/
+.swiftpm/
+migrate_working_dir/
+.env/
+# IntelliJ related
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# The .vscode folder contains launch configuration and tasks you configure in
+# VS Code which you may wish to be included in version control, so this line
+# is commented out by default.
+#.vscode/
+
+# Flutter/Dart/Pub related
+**/doc/api/
+**/ios/Flutter/.last_build_id
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+/build/
+
+# Symbolication related
+app.*.symbols
+
+# Obfuscation related
+app.*.map.json
+
+# Android Studio will place build artifacts here
+/android/app/debug
+/android/app/profile
+/android/app/release
