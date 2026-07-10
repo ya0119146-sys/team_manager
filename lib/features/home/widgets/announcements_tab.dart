@@ -1,5 +1,9 @@
+import 'dart:typed_data';
+import 'package:file_picker/file_picker.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:team_manager/features/auth/widgets/custom_scafold_messanger.dart';
 import 'package:team_manager/features/chat/cubit/chat_cubit/chat_bloc.dart';
 import 'package:team_manager/features/chat/cubit/chat_cubit/chat_event.dart';
 import 'package:team_manager/features/chat/cubit/chat_cubit/chat_state.dart';
@@ -176,6 +180,75 @@ class _AnnouncementCardState extends State<_AnnouncementCard>
   late AnimationController _ctrl;
   late Animation<double> _fade;
   late Animation<Offset> _slide;
+  final Dio dio = Dio();
+
+  Future<void> _downloadFile(
+    BuildContext context,
+    String url,
+    String fileName,
+  ) async {
+    final bool? confirm = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Download File'.tr()),
+          content: Text('${'Do you want to download '.tr()}$fileName?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: Text('Cancel'.tr()),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: Text('Download'.tr()),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirm == true) {
+      try {
+        if (context.mounted) {
+          customScafoldMessenger(
+            context,
+            'Downloading file...'.tr(),
+            color: Colors.blue,
+          );
+        }
+
+        final response = await dio.get(
+          url,
+          options: Options(responseType: ResponseType.bytes),
+        );
+
+        final String? savePath = await FilePicker.platform.saveFile(
+          dialogTitle: '${'Select folder to save '.tr()}$fileName',
+          fileName: fileName,
+          bytes: Uint8List.fromList(response.data as List<int>),
+        );
+
+        if (savePath != null) {
+          if (context.mounted) {
+            customScafoldMessenger(
+              context,
+              'File downloaded successfully!'.tr(),
+              color: Colors.green,
+            );
+          }
+        }
+      } catch (e) {
+        if (context.mounted) {
+          print("E $e");
+          customScafoldMessenger(
+            context,
+            '${'Error downloading file: '.tr()}$e',
+            color: Colors.red,
+          );
+        }
+      }
+    }
+  }
 
   @override
   void initState() {
@@ -405,41 +478,76 @@ class _AnnouncementCardState extends State<_AnnouncementCard>
 
                       if (msg.files.isNotEmpty) ...[
                         const SizedBox(height: 12),
-                        Wrap(
-                          spacing: 8.0,
-                          runSpacing: 8.0,
-                          children: msg.files.map<Widget>((file) {
-                            return ActionChip(
-                              backgroundColor: isDark
-                                  ? const Color(
-                                      0xFF8B5CF6,
-                                    ).withValues(alpha: 0.15)
-                                  : const Color(
-                                      0xFF8B5CF6,
-                                    ).withValues(alpha: 0.08),
-                              side: BorderSide(
-                                color: const Color(
-                                  0xFF8B5CF6,
-                                ).withValues(alpha: 0.3),
+                        ListView.separated(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: msg.files.length,
+                          separatorBuilder: (context, index) => const SizedBox(height: 8),
+                          itemBuilder: (context, index) {
+                            final file = msg.files[index];
+                            final fileName = file['public_id']?.split('/').last ?? 'Attachment';
+                            return InkWell(
+                              onTap: () => _downloadFile(
+                                context,
+                                file['url'] ?? '',
+                                fileName,
                               ),
-                              avatar: const Icon(
-                                Icons.attach_file,
-                                size: 14,
-                                color: Color(0xFF8B5CF6),
-                              ),
-                              label: Text(
-                                'Attachment'.tr(),
-                                style: const TextStyle(
-                                  color: Color(0xFF8B5CF6),
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
+                              borderRadius: BorderRadius.circular(12),
+                              child: Container(
+                                padding: const EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  color: isDark
+                                      ? const Color(0xFF8B5CF6).withValues(alpha: 0.1)
+                                      : const Color(0xFF8B5CF6).withValues(alpha: 0.05),
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                    color: const Color(0xFF8B5CF6).withValues(alpha: 0.2),
+                                  ),
+                                ),
+                                child: Row(
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.all(8),
+                                      decoration: BoxDecoration(
+                                        color: const Color(0xFF8B5CF6).withValues(alpha: 0.15),
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: const Icon(
+                                        Icons.insert_drive_file_outlined,
+                                        color: Color(0xFF8B5CF6),
+                                        size: 20,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: Text(
+                                        fileName,
+                                        style: theme.textTheme.bodyMedium?.copyWith(
+                                          fontWeight: FontWeight.w600,
+                                          color: isDark ? Colors.white : Colors.black87,
+                                        ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                    IconButton(
+                                      icon: const Icon(
+                                        Icons.download_rounded,
+                                        size: 18,
+                                        color: Color(0xFF8B5CF6),
+                                      ),
+                                      onPressed: () => _downloadFile(
+                                        context,
+                                        file['url'] ?? '',
+                                        fileName,
+                                      ),
+                                      tooltip: 'Download file'.tr(),
+                                    ),
+                                  ],
                                 ),
                               ),
-                              onPressed: () {
-                                // TODO: open file['url']
-                              },
                             );
-                          }).toList(),
+                          },
                         ),
                       ],
                     ],

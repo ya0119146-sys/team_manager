@@ -1,12 +1,101 @@
+import 'dart:typed_data';
+import 'package:file_picker/file_picker.dart';
+import 'package:dio/dio.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:team_manager/core/widgets/glass_panel.dart';
 import 'package:team_manager/features/home/models/project_model.dart';
 import 'package:team_manager/features/home/models/attachment_model.dart';
+import 'package:team_manager/features/home/cubit/delte_attachment_cubit/delete_attachment_cubit.dart';
+import 'package:team_manager/features/home/cubit/delte_attachment_cubit/delete_attachment_state.dart';
+import 'package:team_manager/features/auth/widgets/custom_scafold_messanger.dart';
 import 'package:easy_localization/easy_localization.dart';
 
-class OverviewTab extends StatelessWidget {
+class OverviewTab extends StatefulWidget {
   const OverviewTab({super.key, required this.project});
   final ProjectModel project;
+
+  @override
+  State<OverviewTab> createState() => _OverviewTabState();
+}
+
+class _OverviewTabState extends State<OverviewTab> {
+  final Dio dio = Dio();
+  final _deleteAttachmentCubit = DeleteAttachmentCubit();
+
+  @override
+  void dispose() {
+    _deleteAttachmentCubit.close();
+    super.dispose();
+  }
+
+  Future<void> _downloadFile(
+    BuildContext context,
+    String url,
+    String fileName,
+  ) async {
+    final bool? confirm = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Download File'.tr()),
+          content: Text('${'Do you want to download '.tr()}$fileName?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: Text('Cancel'.tr()),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: Text('Download'.tr()),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirm == true) {
+      try {
+        if (context.mounted) {
+          customScafoldMessenger(
+            context,
+            'Downloading file...'.tr(),
+            color: Colors.blue,
+          );
+        }
+
+        final response = await dio.get(
+          url,
+          options: Options(responseType: ResponseType.bytes),
+        );
+
+        final String? savePath = await FilePicker.platform.saveFile(
+          dialogTitle: '${'Select folder to save '.tr()}$fileName',
+          fileName: fileName,
+          bytes: Uint8List.fromList(response.data as List<int>),
+        );
+
+        if (savePath != null) {
+          if (context.mounted) {
+            customScafoldMessenger(
+              context,
+              'File downloaded successfully!'.tr(),
+              color: Colors.green,
+            );
+          }
+        }
+      } catch (e) {
+        if (context.mounted) {
+          print("E $e");
+          customScafoldMessenger(
+            context,
+            '${'Error downloading file: '.tr()}$e',
+            color: Colors.red,
+          );
+        }
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -16,7 +105,7 @@ class OverviewTab extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildTaskOverviewCard(context),
-          if (project.attachments.isNotEmpty) ...[
+          if (widget.project.attachments.isNotEmpty) ...[
             const SizedBox(height: 16),
             _buildAttachmentsCard(context),
           ],
@@ -54,7 +143,7 @@ class OverviewTab extends StatelessWidget {
           _buildTaskStatRow(
             context,
             'Total Tasks'.tr(),
-            project.totalTasks.toString(),
+            widget.project.totalTasks.toString(),
             Icons.format_list_bulleted_rounded,
             Colors.blue,
           ),
@@ -62,7 +151,7 @@ class OverviewTab extends StatelessWidget {
           _buildTaskStatRow(
             context,
             'Pending'.tr(),
-            project.pendingTasks.toString(),
+            widget.project.pendingTasks.toString(),
             Icons.schedule_rounded,
             Colors.orange,
           ),
@@ -70,7 +159,7 @@ class OverviewTab extends StatelessWidget {
           _buildTaskStatRow(
             context,
             'In Progress'.tr(),
-            project.inProgressTasks.toString(),
+            widget.project.inProgressTasks.toString(),
             Icons.autorenew_rounded,
             Colors.purple,
           ),
@@ -78,7 +167,7 @@ class OverviewTab extends StatelessWidget {
           _buildTaskStatRow(
             context,
             'Reviewing'.tr(),
-            project.reviewingTasks.toString(),
+            widget.project.reviewingTasks.toString(),
             Icons.preview_rounded,
             Colors.teal,
           ),
@@ -86,7 +175,7 @@ class OverviewTab extends StatelessWidget {
           _buildTaskStatRow(
             context,
             'Accepted'.tr(),
-            project.acceptedTasks.toString(),
+            widget.project.acceptedTasks.toString(),
             Icons.thumb_up_alt_rounded,
             Colors.indigo,
           ),
@@ -94,7 +183,7 @@ class OverviewTab extends StatelessWidget {
           _buildTaskStatRow(
             context,
             'Done'.tr(),
-            project.doneTasks.toString(),
+            widget.project.doneTasks.toString(),
             Icons.check_circle_outline_rounded,
             Colors.green,
           ),
@@ -182,7 +271,7 @@ class OverviewTab extends StatelessWidget {
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Text(
-                  '${project.attachments.length}',
+                  '${widget.project.attachments.length}',
                   style: theme.textTheme.bodySmall?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: theme.colorScheme.primary,
@@ -195,10 +284,10 @@ class OverviewTab extends StatelessWidget {
           ListView.separated(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            itemCount: project.attachments.length,
+            itemCount: widget.project.attachments.length,
             separatorBuilder: (context, index) => const SizedBox(height: 12),
             itemBuilder: (context, index) {
-              final attachment = project.attachments[index];
+              final attachment = widget.project.attachments[index];
               return _buildAttachmentItem(context, attachment);
             },
           ),
@@ -231,15 +320,11 @@ class OverviewTab extends StatelessWidget {
         ].contains(attachment.format?.toLowerCase());
 
     return InkWell(
-      onTap: () {
-        // Placeholder for attachment tap logic
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Opening ${fileName}...'.tr()),
-            duration: const Duration(seconds: 2),
-          ),
-        );
-      },
+      onTap: () => _downloadFile(
+        context,
+        attachment.secureUrl,
+        fileName,
+      ),
       borderRadius: BorderRadius.circular(12),
       child: Container(
         padding: const EdgeInsets.all(12),
@@ -289,7 +374,75 @@ class OverviewTab extends StatelessWidget {
                 ],
               ),
             ),
-            Icon(Icons.open_in_new_rounded, color: theme.hintColor, size: 20),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                BlocConsumer<DeleteAttachmentCubit, DeleteAttachmentState>(
+                  bloc: _deleteAttachmentCubit,
+                  listenWhen: (previous, current) =>
+                      current is DeleteAttachmentSuccess ||
+                      current is DeleteAttachmentError,
+                  listener: (context, state) {
+                    if (state is DeleteAttachmentSuccess) {
+                      customScafoldMessenger(
+                        context,
+                        "Attachment deleted successfully".tr(),
+                        color: Colors.green,
+                      );
+                      setState(() {
+                        widget.project.attachments.removeWhere(
+                          (element) => element.publicId == attachment.publicId,
+                        );
+                      });
+                    } else if (state is DeleteAttachmentError) {
+                      customScafoldMessenger(
+                        context,
+                        state.message,
+                        color: Colors.red,
+                      );
+                    }
+                  },
+                  builder: (context, state) {
+                    if (state is DeleteAttachmentLoading) {
+                      return const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 12.0),
+                        child: SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        ),
+                      );
+                    }
+                    return IconButton(
+                      icon: const Icon(
+                        Icons.delete_outline,
+                        size: 18,
+                        color: Colors.red,
+                      ),
+                      onPressed: () {
+                        _deleteAttachmentCubit.deleteAttachment(
+                          projectId: widget.project.id,
+                          publicId: attachment.publicId,
+                        );
+                      },
+                      tooltip: 'Delete file'.tr(),
+                    );
+                  },
+                ),
+                IconButton(
+                  icon: const Icon(
+                    Icons.download_rounded,
+                    size: 18,
+                  ),
+                  onPressed: () => _downloadFile(
+                    context,
+                    attachment.secureUrl,
+                    fileName,
+                  ),
+                  tooltip: 'Download file'.tr(),
+                ),
+              ],
+            ),
           ],
         ),
       ),

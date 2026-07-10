@@ -106,7 +106,7 @@ class TeamManager extends StatelessWidget {
           builder: (context, themeState) {
             return MaterialApp.router(
               debugShowCheckedModeBanner: false,
-              title: 'dfsnvkc,m./',
+              title: 'TeamManager',
               themeMode: themeState.themeMode,
               theme: AppTheme.light(),
               darkTheme: AppTheme.dark(),

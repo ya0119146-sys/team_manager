@@ -481,11 +481,6 @@ class _TaskDetailsBottomSheetState extends State<TaskDetailsBottomSheet> {
                                             color: Colors.red,
                                           ),
                                           onPressed: () {
-                                            // encode the publicId because it contains slashes like uploads/images/xyz
-                                            final encodedPublicId =
-                                                Uri.encodeComponent(
-                                                  file.publicId,
-                                                );
                                             _deleteAttachmentCubit
                                                 .deleteAttachment(
                                                   projectId:
