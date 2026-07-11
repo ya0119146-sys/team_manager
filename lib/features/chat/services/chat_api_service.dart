@@ -43,7 +43,6 @@ class ChatApiService {
       url: '/api/v1/chat/announcements/$projectId',
     );
     final List data = response.data['data'] ?? [];
-    print('announcements from api $data');
     return data
         .map((e) => MessageModel.fromJson(e as Map<String, dynamic>))
         .toList();

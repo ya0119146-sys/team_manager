@@ -2,9 +2,9 @@
 /// GET /api/v1/chat/unread-detailed
 ///
 /// Keys follow the pattern:
-///   "dm:<receiverUsername>"        → count of unread DMs from that user
-///   "group:<projectId>"            → count of unread group messages
-///   "announcement:<projectId>"     → count of unread announcements
+///   `dm:<receiverUsername>`        → count of unread DMs from that user
+///   `group:<projectId>`            → count of unread group messages
+///   `announcement:<projectId>`     → count of unread announcements
 class UnreadDetailedModel {
   final Map<String, int> unreadMap;
 

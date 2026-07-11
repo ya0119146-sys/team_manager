@@ -15,7 +15,6 @@ class ProjectCubit extends Cubit<ProjectState> {
       final response = await DioHelper.getData(url: '/api/v1/project');
       if (response.statusCode == 200 || response.statusCode == 201) {
         final List<dynamic> projectsList = response.data['data'];
-        print("projectsList $projectsList");
         projects = projectsList
             .map((e) => ProjectModel.fromProjectsJson(e))
             .toList();
@@ -37,10 +36,8 @@ class ProjectCubit extends Cubit<ProjectState> {
         final ProjectModel project = ProjectModel.fromProjectDetailsJson(
           response.data,
         );
-        print("dataList ${project.emails}");
 
         final List<dynamic> tasksList = response.data['tasks'];
-        print("tasksList $tasksList");
         tasks = tasksList.map((e) => TaskModel.fromJson(e, projectIdOverride: id)).toList();
         emit(ProjectOneSuccessState(project: project, tasks: tasks));
       }

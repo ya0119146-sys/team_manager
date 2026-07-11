@@ -46,35 +46,35 @@ class _HomeTaskScreenState extends State<HomeTaskScreen> {
   TaskStatus _mapStatus(String status) {
     switch (status.toLowerCase()) {
       case 'pending':
-        return TaskStatus.Pending;
+        return TaskStatus.pending;
       case 'in progress':
       case 'inprogress':
       case 'in_progress':
       case 'in-progress':
-        return TaskStatus.InProgress;
+        return TaskStatus.inProgress;
       case 'reviewing':
-        return TaskStatus.Reviewing;
+        return TaskStatus.reviewing;
       case 'done':
       case 'completed':
-        return TaskStatus.Done;
+        return TaskStatus.done;
       case 'accepted':
-        return TaskStatus.Accepted;
+        return TaskStatus.accepted;
       default:
-        return TaskStatus.Pending;
+        return TaskStatus.pending;
     }
   }
 
   String _getFilterName(TaskFilter filter) {
     switch (filter) {
-      case TaskFilter.Pending:
+      case TaskFilter.pending:
         return 'Pending';
-      case TaskFilter.InProgress:
+      case TaskFilter.inProgress:
         return 'In Progress';
-      case TaskFilter.Reviewing:
+      case TaskFilter.reviewing:
         return 'Reviewing';
-      case TaskFilter.Done:
+      case TaskFilter.done:
         return 'Done';
-      case TaskFilter.Accepted:
+      case TaskFilter.accepted:
         return 'Accepted';
       case TaskFilter.all:
         return 'All Status';
@@ -84,15 +84,15 @@ class _HomeTaskScreenState extends State<HomeTaskScreen> {
   TaskFilter _getFilterFromName(String name) {
     switch (name) {
       case 'Pending':
-        return TaskFilter.Pending;
+        return TaskFilter.pending;
       case 'In Progress':
-        return TaskFilter.InProgress;
+        return TaskFilter.inProgress;
       case 'Reviewing':
-        return TaskFilter.Reviewing;
+        return TaskFilter.reviewing;
       case 'Done':
-        return TaskFilter.Done;
+        return TaskFilter.done;
       case 'Accepted':
-        return TaskFilter.Accepted;
+        return TaskFilter.accepted;
       case 'All Status':
       default:
         return TaskFilter.all;
@@ -104,33 +104,33 @@ class _HomeTaskScreenState extends State<HomeTaskScreen> {
     List<TaskModel> filteredByStatus;
 
     switch (selectedFilter) {
-      case TaskFilter.Pending:
+      case TaskFilter.pending:
         filteredByStatus = tasks
-            .where((t) => _mapStatus(t.status) == TaskStatus.Pending)
+            .where((t) => _mapStatus(t.status) == TaskStatus.pending)
             .toList();
         break;
 
-      case TaskFilter.InProgress:
+      case TaskFilter.inProgress:
         filteredByStatus = tasks
-            .where((t) => _mapStatus(t.status) == TaskStatus.InProgress)
+            .where((t) => _mapStatus(t.status) == TaskStatus.inProgress)
             .toList();
         break;
 
-      case TaskFilter.Reviewing:
+      case TaskFilter.reviewing:
         filteredByStatus = tasks
-            .where((t) => _mapStatus(t.status) == TaskStatus.Reviewing)
+            .where((t) => _mapStatus(t.status) == TaskStatus.reviewing)
             .toList();
         break;
 
-      case TaskFilter.Done:
+      case TaskFilter.done:
         filteredByStatus = tasks
-            .where((t) => _mapStatus(t.status) == TaskStatus.Done)
+            .where((t) => _mapStatus(t.status) == TaskStatus.done)
             .toList();
         break;
 
-      case TaskFilter.Accepted:
+      case TaskFilter.accepted:
         filteredByStatus = tasks
-            .where((t) => _mapStatus(t.status) == TaskStatus.Accepted)
+            .where((t) => _mapStatus(t.status) == TaskStatus.accepted)
             .toList();
         break;
 
@@ -252,18 +252,19 @@ class _HomeTaskScreenState extends State<HomeTaskScreen> {
                   onChanged: (value) {
                     // Find the original english key based on the translated value to keep logic working
                     String enValue = value;
-                    if (value == 'All Status'.tr())
+                    if (value == 'All Status'.tr()) {
                       enValue = 'All Status';
-                    else if (value == 'Pending'.tr())
+                    } else if (value == 'Pending'.tr()) {
                       enValue = 'Pending';
-                    else if (value == 'In Progress'.tr())
+                    } else if (value == 'In Progress'.tr()) {
                       enValue = 'In Progress';
-                    else if (value == 'Reviewing'.tr())
+                    } else if (value == 'Reviewing'.tr()) {
                       enValue = 'Reviewing';
-                    else if (value == 'Done'.tr())
+                    } else if (value == 'Done'.tr()) {
                       enValue = 'Done';
-                    else if (value == 'Accepted'.tr())
+                    } else if (value == 'Accepted'.tr()) {
                       enValue = 'Accepted';
+                    }
 
                     setState(() {
                       selectedFilter = _getFilterFromName(enValue);
@@ -411,21 +412,21 @@ class _HomeTaskScreenState extends State<HomeTaskScreen> {
         children: [
           item('${'All'.tr()} (${count(TaskFilter.all)})', TaskFilter.all),
           item(
-            '${'Pending'.tr()} (${count(TaskFilter.Pending)})',
-            TaskFilter.Pending,
+            '${'Pending'.tr()} (${count(TaskFilter.pending)})',
+            TaskFilter.pending,
           ),
           item(
-            '${'In Progress'.tr()} (${count(TaskFilter.InProgress)})',
-            TaskFilter.InProgress,
+            '${'In Progress'.tr()} (${count(TaskFilter.inProgress)})',
+            TaskFilter.inProgress,
           ),
           item(
-            '${'Reviewing'.tr()} (${count(TaskFilter.Reviewing)})',
-            TaskFilter.Reviewing,
+            '${'Reviewing'.tr()} (${count(TaskFilter.reviewing)})',
+            TaskFilter.reviewing,
           ),
-          item('${'Done'.tr()} (${count(TaskFilter.Done)})', TaskFilter.Done),
+          item('${'Done'.tr()} (${count(TaskFilter.done)})', TaskFilter.done),
           item(
-            '${'Accepted'.tr()} (${count(TaskFilter.Accepted)})',
-            TaskFilter.Accepted,
+            '${'Accepted'.tr()} (${count(TaskFilter.accepted)})',
+            TaskFilter.accepted,
           ),
         ],
       ),
@@ -433,6 +434,6 @@ class _HomeTaskScreenState extends State<HomeTaskScreen> {
   }
 }
 
-enum TaskStatus { Pending, InProgress, Reviewing, Done, Accepted }
+enum TaskStatus { pending, inProgress, reviewing, done, accepted }
 
-enum TaskFilter { all, Pending, InProgress, Reviewing, Done, Accepted }
+enum TaskFilter { all, pending, inProgress, reviewing, done, accepted }

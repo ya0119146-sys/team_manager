@@ -5,7 +5,7 @@ import 'package:team_manager/features/notification/services/notification_service
 class EditViewedNotificationCubit extends Cubit<EditViewedNotificationState> {
   EditViewedNotificationCubit() : super(EditViewedNotificationInitial());
 
-  void editViewedNotification(String id) async {
+  Future<void> editViewedNotification(String id) async {
     emit(EditViewedNotificationLoading());
     try {
       final response = await NotificationService().editViewedNotification(

@@ -97,13 +97,16 @@ class _ForgetPasswordCardState extends State<ForgetPasswordCard> {
                 const SizedBox(height: 24),
                 GlassButton(
                   label: 'Send OTP'.tr(),
-                  onPressed: () {
-                    if (formKey.currentState!.validate()) {
-                      forgetPasswordCubit.resetCode(
-                        email: emailController.text,
-                      );
-                    }
-                  },
+                  isLoading: state is ForgetPasswordLoading,
+                  onPressed: state is ForgetPasswordLoading
+                      ? null
+                      : () {
+                          if (formKey.currentState!.validate()) {
+                            forgetPasswordCubit.resetCode(
+                              email: emailController.text,
+                            );
+                          }
+                        },
                 ),
 
                 const SizedBox(height: 32),

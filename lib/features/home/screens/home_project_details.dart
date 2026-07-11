@@ -38,11 +38,6 @@ class _HomeProjectDetailsState extends State<HomeProjectDetails>
   ProjectModel? project;
 
   // Tab indices
-  static const int _tabOverview = 0;
-  static const int _tabTasks = 1;
-  static const int _tabMembers = 2;
-  static const int _tabChat = 3;
-  static const int _tabAnnouncements = 4;
 
   @override
   void initState() {
@@ -495,8 +490,6 @@ class _HomeProjectDetailsState extends State<HomeProjectDetails>
         physics: const BouncingScrollPhysics(),
         child: Row(
           children: List.generate(tabs.length, (index) {
-            // Announcements tab gets special purple color when selected
-            final isAnnounce = index == _tabAnnouncements;
             return TabItem(
               text: tabs[index].label,
               icon: tabs[index].icon,

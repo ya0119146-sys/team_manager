@@ -14,20 +14,22 @@ class DeleteAttachmentCubit extends Cubit<DeleteAttachmentState> {
     emit(DeleteAttachmentLoading(publicId: publicId));
     try {
       final encodedPublicId = Uri.encodeComponent(publicId);
-      final url = taskId != null 
+      final url = taskId != null
           ? '/api/v1/project/$projectId/task/$taskId/att/$encodedPublicId'
           : '/api/v1/project/$projectId/att/$encodedPublicId';
 
-      final response = await DioHelper.deleteData(
-        url: url,
-      );
+      final response = await DioHelper.deleteData(url: url);
       if (response.statusCode == 200 || response.statusCode == 201) {
         emit(DeleteAttachmentSuccess(publicId: publicId));
       } else {
-        emit(DeleteAttachmentError(message: 'Failed to delete attachment', publicId: publicId));
+        emit(
+          DeleteAttachmentError(
+            message: 'Failed to delete attachment',
+            publicId: publicId,
+          ),
+        );
       }
     } on DioException catch (e) {
-      print("delete attachment cubit error: ${e.response}");
       emit(
         DeleteAttachmentError(
           message:

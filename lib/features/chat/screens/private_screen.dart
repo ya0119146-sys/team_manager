@@ -96,35 +96,35 @@ class _PrivateScreenState extends State<PrivateScreen> {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  trailing: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Text(
-                        _formatTime(DateTime.now()),
-                        style: theme.textTheme.bodySmall,
-                      ),
-                      const SizedBox(height: 4),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 2,
-                        ),
-                        decoration: BoxDecoration(
-                          color: theme.colorScheme.primary,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Text(
-                          '1',
-                          style: TextStyle(
-                            color: theme.colorScheme.onPrimary,
-                            fontSize: 11,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+                  // trailing: Column(
+                  //   mainAxisAlignment: MainAxisAlignment.center,
+                  //   crossAxisAlignment: CrossAxisAlignment.end,
+                  //   children: [
+                  //     Text(
+                  //       _formatTime(DateTime.now()),
+                  //       style: theme.textTheme.bodySmall,
+                  //     ),
+                  //     const SizedBox(height: 4),
+                  //     Container(
+                  //       padding: const EdgeInsets.symmetric(
+                  //         horizontal: 8,
+                  //         vertical: 2,
+                  //       ),
+                  //       decoration: BoxDecoration(
+                  //         color: theme.colorScheme.primary,
+                  //         borderRadius: BorderRadius.circular(12),
+                  //       ),
+                  //       child: Text(
+                  //         '1',
+                  //         style: TextStyle(
+                  //           color: theme.colorScheme.onPrimary,
+                  //           fontSize: 11,
+                  //           fontWeight: FontWeight.bold,
+                  //         ),
+                  //       ),
+                  //  ),
+                  //],
+                  //  ),
                   onTap: () {
                     Navigator.push(
                       context,

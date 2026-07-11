@@ -30,7 +30,6 @@ class AnnouncementsTab extends StatefulWidget {
 class _AnnouncementsTabState extends State<AnnouncementsTab> {
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     context.read<ChatBloc>().add(FetchAnnouncementsEvent(widget.projectId));
   }
@@ -239,7 +238,6 @@ class _AnnouncementCardState extends State<_AnnouncementCard>
         }
       } catch (e) {
         if (context.mounted) {
-          print("E $e");
           customScafoldMessenger(
             context,
             '${'Error downloading file: '.tr()}$e',

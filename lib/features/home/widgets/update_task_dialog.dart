@@ -14,10 +14,8 @@ import 'package:team_manager/features/auth/widgets/custom_scafold_messanger.dart
 import 'package:team_manager/core/widgets/glass_input_field.dart';
 import 'package:team_manager/core/widgets/glass_button.dart';
 import 'package:team_manager/core/widgets/custom_dropdown.dart';
-import 'package:team_manager/features/home/cubit/get_admin_dashboard_cubit/get_admin_dashboard_cubit.dart';
 import 'package:team_manager/features/home/widgets/file_selector_widget.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:team_manager/features/home/widgets/status_drop_down_tasks.dart';
 
 /// Admin-only dialog for updating a task's full details.
 /// Endpoint: PUT /api/v1/project/:projectId/task/:taskId (multipart/form-data)
@@ -80,23 +78,6 @@ class _UpdateTaskDialogState extends State<UpdateTaskDialog> {
     super.dispose();
   }
 
-  Color _statusColor(String status) {
-    switch (status.toLowerCase()) {
-      case 'pending':
-        return const Color(0xFFF59E0B);
-      case 'in-progress':
-        return const Color(0xFF3B82F6);
-      case 'reviewing':
-        return const Color(0xFF8B5CF6);
-      case 'done':
-        return const Color(0xFF22C55E);
-      case 'accepted':
-        return const Color(0xFF10B981);
-      default:
-        return const Color(0xFF6B7280);
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final updateTaskCubit = UpdateTaskCubit.get(context);
@@ -129,7 +110,6 @@ class _UpdateTaskDialogState extends State<UpdateTaskDialog> {
       },
       builder: (context, state) {
         final theme = Theme.of(context);
-        final isDark = theme.brightness == Brightness.dark;
 
         return ModalProgressHUD(
           inAsyncCall: state is UpdateTaskLoading,

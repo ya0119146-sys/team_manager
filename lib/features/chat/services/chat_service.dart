@@ -1,5 +1,5 @@
 import 'dart:developer';
-import 'package:socket_io_client/socket_io_client.dart' as IO;
+import 'package:socket_io_client/socket_io_client.dart' as io;
 
 /// Manages the Socket.io connection lifecycle.
 ///
@@ -13,7 +13,7 @@ class ChatSocketService {
   factory ChatSocketService() => _instance;
   ChatSocketService._internal();
 
-  IO.Socket? _socket;
+  io.Socket? _socket;
 
   bool get isConnected => _socket?.connected ?? false;
 
@@ -33,9 +33,9 @@ class ChatSocketService {
   }) {
     if (_socket != null && _socket!.connected) return;
 
-    _socket = IO.io(
+    _socket = io.io(
       'https://teammanagent-production.up.railway.app',
-      IO.OptionBuilder()
+      io.OptionBuilder()
           .setTransports(['websocket'])
           // ✅ Correct: backend reads token from socket.handshake.auth.token
           .setAuth({'token': token})

@@ -1,4 +1,4 @@
-import 'package:socket_io_client/socket_io_client.dart' as IO;
+import 'package:socket_io_client/socket_io_client.dart' as io;
 import 'package:team_manager/core/helpers/dio_helper.dart';
 
 class NotificationService {
@@ -7,7 +7,7 @@ class NotificationService {
   factory NotificationService() => _instance;
   NotificationService._internal();
 
-  IO.Socket? _socket;
+  io.Socket? _socket;
 
   bool get isConnected => _socket?.connected ?? false;
 
@@ -17,9 +17,9 @@ class NotificationService {
   void connect(String token) {
     if (_socket != null && _socket!.connected) return;
 
-    _socket = IO.io(
+    _socket = io.io(
       'https://teammanagent-production.up.railway.app',
-      IO.OptionBuilder()
+      io.OptionBuilder()
           .setTransports(['websocket'])
           .setAuth({'token': token})
           .disableAutoConnect()

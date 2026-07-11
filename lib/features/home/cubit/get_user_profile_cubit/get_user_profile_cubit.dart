@@ -15,7 +15,6 @@ class GetUserProfileCubit extends Cubit<GetUserProfileState> {
       if (response.statusCode == 200 || response.statusCode == 201) {
         String username = response.data['data']['username'];
         CacheHelper.saveData(key: 'username', value: username);
-        print("response ${response.data['data']}");
         ProfileModel profileModel = ProfileModel.fromJson(
           response.data['data'],
         );

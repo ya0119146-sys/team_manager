@@ -98,6 +98,15 @@ class _CustomDropdownState<T> extends State<CustomDropdown<T>>
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
+    final offset = box.localToGlobal(Offset.zero);
+    final screenSize = MediaQuery.of(context).size;
+    
+    final dropdownHeight = (widget.items.length * 50.0 + 16.0).clamp(0.0, 300.0);
+    final spaceBelow = screenSize.height - offset.dy - size.height;
+    final spaceAbove = offset.dy;
+    
+    final bool showUpwards = spaceBelow < dropdownHeight && spaceAbove > spaceBelow;
+
     return OverlayEntry(
       builder: (context) => GestureDetector(
         behavior: HitTestBehavior.translucent,
@@ -108,7 +117,10 @@ class _CustomDropdownState<T> extends State<CustomDropdown<T>>
               width: size.width,
               child: CompositedTransformFollower(
                 link: layerLink,
-                offset: Offset(0, size.height + 8),
+                showWhenUnlinked: false,
+                offset: Offset(0, showUpwards ? -8 : size.height + 8),
+                targetAnchor: showUpwards ? Alignment.topLeft : Alignment.topLeft,
+                followerAnchor: showUpwards ? Alignment.bottomLeft : Alignment.topLeft,
                 child: Material(
                   elevation: 8,
                   color: Colors.transparent,

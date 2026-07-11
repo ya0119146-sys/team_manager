@@ -86,7 +86,6 @@ class _OverviewTabState extends State<OverviewTab> {
         }
       } catch (e) {
         if (context.mounted) {
-          print("E $e");
           customScafoldMessenger(
             context,
             '${'Error downloading file: '.tr()}$e',

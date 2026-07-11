@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
 import 'package:team_manager/core/theme/app_theme.dart';
 import 'package:team_manager/core/utils/app_router.dart';
 import 'package:team_manager/core/helpers/cache_helper.dart';
@@ -44,6 +45,7 @@ void main() async {
   await dotenv.load(fileName: ".env");
   await DioHelper.init();
   await CacheHelper.init();
+
   runApp(
     EasyLocalization(
       supportedLocales: const [Locale('en'), Locale('ar')],
@@ -81,9 +83,7 @@ class TeamManager extends StatelessWidget {
         BlocProvider(create: (context) => GetAdminDashboardCubit()),
         BlocProvider(create: (context) => DeleteUserProfileCubit()),
         BlocProvider(create: (context) => UpdateUserProfileCubit()),
-        BlocProvider(
-          create: (context) => GetUserProfileCubit()..getUserProfile(),
-        ),
+        BlocProvider(create: (context) => GetUserProfileCubit()),
         BlocProvider(create: (context) => DeleteMemberCubit()),
 
         // ── Chat (single unified BLoC) ───────────────────────────────────

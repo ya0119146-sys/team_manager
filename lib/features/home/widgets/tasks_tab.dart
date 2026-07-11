@@ -42,8 +42,6 @@ class _TasksTabState extends State<TasksTab> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     return BlocBuilder<GetProjectTasksCubit, GetProjectTasksState>(
       builder: (context, state) {
         if (state is GetProjectTasksLoading) {

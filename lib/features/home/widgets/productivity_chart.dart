@@ -22,25 +22,25 @@ class _ProductivityChartState extends State<ProductivityChart>
   late AnimationController _animController;
   late Animation<double> _chartAnimation;
 
-  static const List<String> _daysOrder = [
-    'Saturday',
-    'Sunday',
-    'Monday',
-    'Tuesday',
-    'Wednesday',
-    'Thursday',
-    'Friday',
-  ];
+  List<String> _getPast7DaysFull() {
+    final now = DateTime.now();
+    const days = [
+      'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'
+    ];
+    return List.generate(7, (index) {
+      final date = now.subtract(Duration(days: 6 - index));
+      return days[date.weekday - 1]; 
+    });
+  }
 
-  static const List<String> _daysAbbr = [
-    'Sat',
-    'Sun',
-    'Mon',
-    'Tue',
-    'Wed',
-    'Thu',
-    'Fri',
-  ];
+  List<String> _getPast7DaysAbbr() {
+    final now = DateTime.now();
+    const abbrs = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    return List.generate(7, (index) {
+      final date = now.subtract(Duration(days: 6 - index));
+      return abbrs[date.weekday - 1]; 
+    });
+  }
 
   @override
   void initState() {
@@ -108,8 +108,9 @@ class _ProductivityChartState extends State<ProductivityChart>
         double maxY = 5;
 
         if (_activeTab == 'weekly') {
-          for (int i = 0; i < _daysOrder.length; i++) {
-            final taskCount = _getTaskCountForDay(_daysOrder[i]);
+          final daysOrder = _getPast7DaysFull();
+          for (int i = 0; i < daysOrder.length; i++) {
+            final taskCount = _getTaskCountForDay(daysOrder[i]);
             spots.add(FlSpot(i.toDouble(), taskCount.toDouble()));
             if (taskCount > maxY) maxY = taskCount.toDouble();
           }
@@ -273,10 +274,11 @@ class _ProductivityChartState extends State<ProductivityChart>
                 const SizedBox(height: 8),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: List.generate(_daysAbbr.length, (i) {
+                  children: List.generate(7, (i) {
+                    final abbrs = _getPast7DaysAbbr();
                     final count = spots[i].y.toInt();
                     return _DayColumn(
-                      day: _daysAbbr[i],
+                      day: abbrs[i],
                       count: count,
                       isActive: count > 0,
                       isPeak: i == peakIndex && peakValue > 0,
@@ -389,7 +391,7 @@ class _ProductivityChartState extends State<ProductivityChart>
           getTooltipItems: (spots) {
             return spots.map((spot) {
               final label = _activeTab == 'weekly'
-                  ? _daysOrder[spot.x.toInt()]
+                  ? _getPast7DaysFull()[spot.x.toInt()]
                   : (spot.x.toInt() < trendData.length
                         ? trendData[spot.x.toInt()].name
                         : '');
@@ -463,9 +465,16 @@ class _ProductivityChartState extends State<ProductivityChart>
         LineChartBarData(
           spots: spots,
           isCurved: true,
-          curveSmoothness: 0.35,
-          color: primary,
-          barWidth: 3,
+          curveSmoothness: 0.4,
+          gradient: LinearGradient(
+            colors: [
+              primary.withValues(alpha: 0.6),
+              primary,
+            ],
+            begin: Alignment.centerLeft,
+            end: Alignment.centerRight,
+          ),
+          barWidth: 4,
           isStrokeCapRound: true,
           dotData: FlDotData(
             show: true,
@@ -473,10 +482,10 @@ class _ProductivityChartState extends State<ProductivityChart>
               final isPeak = index == peakIndex;
               final isTouched = index == _touchedIndex;
               return FlDotCirclePainter(
-                radius: isTouched ? 6 : (isPeak ? 5 : 3.5),
-                color: isTouched || isPeak ? primary : Colors.transparent,
-                strokeWidth: isTouched || isPeak ? 0 : 2,
-                strokeColor: primary,
+                radius: isTouched ? 6 : (isPeak ? 5 : 3),
+                color: isTouched || isPeak ? Colors.white : primary,
+                strokeWidth: isTouched || isPeak ? 3 : 1.5,
+                strokeColor: isTouched || isPeak ? primary : Colors.white,
               );
             },
           ),
@@ -484,16 +493,16 @@ class _ProductivityChartState extends State<ProductivityChart>
             show: true,
             gradient: LinearGradient(
               colors: [
-                primary.withValues(alpha: 0.3),
-                primary.withValues(alpha: 0.08),
+                primary.withValues(alpha: 0.4),
+                primary.withValues(alpha: 0.1),
                 primary.withValues(alpha: 0.0),
               ],
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
-              stops: const [0.0, 0.5, 1.0],
+              stops: const [0.0, 0.6, 1.0],
             ),
           ),
-          shadow: Shadow(color: primary.withValues(alpha: 0.25), blurRadius: 8),
+          shadow: Shadow(color: primary.withValues(alpha: 0.3), blurRadius: 10, offset: const Offset(0, 4)),
         ),
       ],
     );

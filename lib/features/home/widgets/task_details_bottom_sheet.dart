@@ -10,6 +10,7 @@ import 'package:team_manager/core/widgets/glass_button.dart';
 import 'package:team_manager/core/widgets/status_chip.dart';
 import 'package:team_manager/core/widgets/custom_dropdown.dart';
 import 'package:team_manager/features/home/cubit/get_admin_dashboard_cubit/get_admin_dashboard_cubit.dart';
+import 'package:team_manager/features/home/cubit/get_project_tasks_cubit/get_project_tasks_cubit.dart';
 import 'package:team_manager/features/home/cubit/get_user_task_cubit/get_user_task_cubit.dart';
 import 'package:team_manager/features/home/cubit/update_task_status_cubit/update_task_status_cubit.dart';
 import 'package:team_manager/features/home/cubit/update_task_status_cubit/update_task_status_state.dart';
@@ -143,7 +144,6 @@ class _TaskDetailsBottomSheetState extends State<TaskDetailsBottomSheet> {
         }
       } catch (e) {
         if (context.mounted) {
-          print("E $e");
           customScafoldMessenger(
             context,
             '${'Error downloading file: '.tr()}$e',
@@ -179,8 +179,10 @@ class _TaskDetailsBottomSheetState extends State<TaskDetailsBottomSheet> {
             'Task status updated successfully!'.tr(),
             color: Colors.green,
           );
-          GetAdminDashboardCubit.get(context).getAdminDashboard();
-          GetUserTaskCubit.get(context).getUserTask();
+          context.read<GetProjectTasksCubit>().getProjectTasks(
+            projectId: widget.task.projectId ?? '',
+          );
+          context.read<GetUserTaskCubit>().getUserTask();
           widget.onUpdated();
           Navigator.pop(context);
         } else if (state is UpdateTaskStatusError) {
@@ -674,10 +676,12 @@ class _TaskDetailsBottomSheetState extends State<TaskDetailsBottomSheet> {
                             );
 
                             setState(() {
-                              widget.task.adminAttachment
-                                  .removeWhere((a) => a.publicId == state.publicId);
-                              widget.task.memberAttachment
-                                  .removeWhere((a) => a.publicId == state.publicId);
+                              widget.task.adminAttachment.removeWhere(
+                                (a) => a.publicId == state.publicId,
+                              );
+                              widget.task.memberAttachment.removeWhere(
+                                (a) => a.publicId == state.publicId,
+                              );
                             });
 
                             widget.onUpdated();
@@ -690,7 +694,8 @@ class _TaskDetailsBottomSheetState extends State<TaskDetailsBottomSheet> {
                           }
                         },
                         builder: (context, state) {
-                          if (state is DeleteAttachmentLoading && state.publicId == file.publicId) {
+                          if (state is DeleteAttachmentLoading &&
+                              state.publicId == file.publicId) {
                             return const Padding(
                               padding: EdgeInsets.symmetric(horizontal: 12.0),
                               child: SizedBox(

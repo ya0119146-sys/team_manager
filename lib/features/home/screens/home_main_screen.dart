@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:team_manager/core/helpers/cache_helper.dart';
 import 'package:team_manager/core/helpers/secure_storage_helper.dart';
 import 'package:team_manager/features/home/cubit/get_all_project_cubit/project_cubit.dart';
+import 'package:team_manager/features/home/cubit/get_user_profile_cubit/get_user_profile_cubit.dart';
 import 'package:team_manager/features/home/screens/home_dashboard_screen.dart';
 import 'package:team_manager/features/home/screens/home_project_screen.dart';
 import 'package:team_manager/features/home/screens/home_task_screen.dart';
@@ -470,7 +471,7 @@ class _HomeMainScreenState extends State<HomeMainScreen> {
                           IconButton(
                             icon: const Icon(
                               Icons.notifications_none_rounded,
-                              size: 24,
+                              size: 26,
                             ),
                             onPressed: () => changeScreen(notificationsIndex),
                           ),
@@ -485,17 +486,17 @@ class _HomeMainScreenState extends State<HomeMainScreen> {
                                   shape: BoxShape.circle,
                                   border: Border.all(
                                     color: theme.scaffoldBackgroundColor,
-                                    width: 1.5,
+                                    width: 2,
                                   ),
                                 ),
                                 constraints: const BoxConstraints(
-                                  minWidth: 18,
-                                  minHeight: 18,
+                                  minWidth: 22,
+                                  minHeight: 22,
                                 ),
                                 child: Center(
                                   child: Text(
-                                    unreadCount > 9
-                                        ? '9+'
+                                    unreadCount > 99
+                                        ? '99+'
                                         : unreadCount.toString(),
                                     style: const TextStyle(
                                       color: Colors.white,

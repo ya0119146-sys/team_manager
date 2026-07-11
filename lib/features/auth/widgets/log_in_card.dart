@@ -30,8 +30,9 @@ class _LoginCardState extends State<LoginCard> {
   }
 
   String? _validatePassword(String? value) {
-    if (value == null || value.trim().isEmpty)
+    if (value == null || value.trim().isEmpty) {
       return 'Password is required'.tr();
+    }
     return null;
   }
 

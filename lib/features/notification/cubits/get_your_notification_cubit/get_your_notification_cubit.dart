@@ -16,7 +16,6 @@ class GetYourNotificationCubit extends Cubit<GetYourNotificationState> {
         notifications = (response.data['data'] as List)
             .map<NotificationModel>((e) => NotificationModel.fromJson(e))
             .toList();
-        print(' notifications.toString() : ${notifications.toString()}');
 
         emit(GetYourNotificationSuccess(notifications));
       }

@@ -79,16 +79,14 @@ class ChatBubble extends StatelessWidget {
         ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.end,
-          mainAxisAlignment:
-              isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
+          mainAxisAlignment: isMe
+              ? MainAxisAlignment.end
+              : MainAxisAlignment.start,
           children: [
             // ── Avatar (others only) ─────────────────────────────────────
             if (!isMe) ...[
               if (showSenderInfo)
-                _Avatar(
-                  initial: initial,
-                  color: avatarColor,
-                )
+                _Avatar(initial: initial, color: avatarColor)
               else
                 const SizedBox(width: 34),
               const SizedBox(width: 6),
@@ -97,8 +95,9 @@ class ChatBubble extends StatelessWidget {
             // ── Bubble column ─────────────────────────────────────────────
             Flexible(
               child: Column(
-                crossAxisAlignment:
-                    isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+                crossAxisAlignment: isMe
+                    ? CrossAxisAlignment.end
+                    : CrossAxisAlignment.start,
                 children: [
                   // Sender name
                   if (!isMe && showSenderInfo)
@@ -123,7 +122,9 @@ class ChatBubble extends StatelessWidget {
                       padding: const EdgeInsets.only(bottom: 5),
                       child: Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 10, vertical: 5),
+                          horizontal: 10,
+                          vertical: 5,
+                        ),
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
                             colors: [
@@ -133,16 +134,20 @@ class ChatBubble extends StatelessWidget {
                           ),
                           borderRadius: BorderRadius.circular(10),
                           border: Border.all(
-                            color: const Color(0xFF8B5CF6)
-                                .withValues(alpha: 0.4),
+                            color: const Color(
+                              0xFF8B5CF6,
+                            ).withValues(alpha: 0.4),
                             width: 1,
                           ),
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Icon(Icons.campaign_rounded,
-                                size: 13, color: Color(0xFF8B5CF6)),
+                            const Icon(
+                              Icons.campaign_rounded,
+                              size: 13,
+                              color: Color(0xFF8B5CF6),
+                            ),
                             const SizedBox(width: 5),
                             Flexible(
                               child: Text(
@@ -176,8 +181,9 @@ class ChatBubble extends StatelessWidget {
                       boxShadow: [
                         BoxShadow(
                           color: isMe
-                              ? theme.colorScheme.primary
-                                  .withValues(alpha: 0.25)
+                              ? theme.colorScheme.primary.withValues(
+                                  alpha: 0.25,
+                                )
                               : Colors.black.withValues(alpha: 0.06),
                           blurRadius: isMe ? 8 : 4,
                           offset: const Offset(0, 2),
@@ -192,16 +198,15 @@ class ChatBubble extends StatelessWidget {
                         children: [
                           // Message text — allow bidirectional text inside
                           Directionality(
-                            textDirection: _detectTextDirection(message.content),
-                            child: Align(
-                              alignment: Alignment.centerLeft,
-                              child: Text(
-                                message.content,
-                                style: TextStyle(
-                                  color: isMe ? myTextColor : otherTextColor,
-                                  fontSize: 14.5,
-                                  height: 1.45,
-                                ),
+                            textDirection: _detectTextDirection(
+                              message.content,
+                            ),
+                            child: Text(
+                              message.content,
+                              style: TextStyle(
+                                color: isMe ? myTextColor : otherTextColor,
+                                fontSize: 14.5,
+                                height: 1.45,
                               ),
                             ),
                           ),
@@ -276,10 +281,7 @@ class _Avatar extends StatelessWidget {
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         gradient: LinearGradient(
-          colors: [
-            color,
-            color.withValues(alpha: 0.7),
-          ],
+          colors: [color, color.withValues(alpha: 0.7)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),

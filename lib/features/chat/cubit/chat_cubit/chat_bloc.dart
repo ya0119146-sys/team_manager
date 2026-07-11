@@ -181,7 +181,6 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     );
     try {
       final msgs = await _api.getAnnouncements(event.projectId);
-      print("msgs $msgs");
       emit(
         state.copyWith(
           conversationStatus: ConversationStatus.success,
@@ -252,7 +251,6 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
         content: event.content,
         files: uploadedFiles,
       );
-      print("send announcements $event");
       _appendOptimistic(
         emit: emit,
         type: 'announcement',

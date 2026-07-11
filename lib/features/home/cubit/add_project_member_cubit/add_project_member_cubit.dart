@@ -20,7 +20,6 @@ class AddProjectMemberCubit extends Cubit<AddProjectMemberState> {
         emit(AddProjectMemberSuccess());
       }
     } on DioException catch (e) {
-      print(e);
       emit(
         AddProjectMemberError(message: e.response?.data['errors'][0]['msg']),
       );

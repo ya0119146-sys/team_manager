@@ -65,7 +65,9 @@ class _NotificationsBodyState extends State<_NotificationsBody> {
       appBar: AppBar(
         title: Text(
           'Notifications'.tr(),
-          style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+          style: theme.textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
         ),
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -141,9 +143,9 @@ class _NotificationsBodyState extends State<_NotificationsBody> {
               Text(
                 '${list.where((n) => !n.isRead).length} ${'unread'.tr()}',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: Theme.of(context).hintColor,
-                    ),
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).hintColor,
+                ),
               ),
               if (list.any((n) => !n.isRead))
                 SizedBox(
@@ -153,7 +155,9 @@ class _NotificationsBodyState extends State<_NotificationsBody> {
                     onPressed: () {
                       context.read<MarkAllDoneCubit>().markAllDone();
                       // Optimistic local UI update
-                      context.read<NotificationSocketCubit>().markAllAsReadLocally();
+                      context
+                          .read<NotificationSocketCubit>()
+                          .markAllAsReadLocally();
                       // Refresh top-bar unread count badge
                       context.read<GetUnreadCountCubit>().getUnreadCount();
                     },
@@ -182,91 +186,221 @@ class _NotificationsBodyState extends State<_NotificationsBody> {
   }
 }
 
-class _NotificationItem extends StatelessWidget {
+class _NotificationItem extends StatefulWidget {
   final NotificationModel item;
 
   const _NotificationItem({required this.item});
+
+  @override
+  State<_NotificationItem> createState() => _NotificationItemState();
+}
+
+class _NotificationItemState extends State<_NotificationItem>
+    with SingleTickerProviderStateMixin {
+  bool _isLoading = false;
+  late AnimationController _animationController;
+  late Animation<double> _scaleAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 150),
+      lowerBound: 0.0,
+      upperBound: 0.03,
+    );
+    _scaleAnimation = Tween<double>(
+      begin: 1.0,
+      end: 0.0,
+    ).animate(_animationController);
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _handleTap() async {
+    if (widget.item.isRead || _isLoading) return;
+
+    setState(() => _isLoading = true);
+
+    try {
+      // Trigger REST patch call and wait for it
+      await context.read<EditViewedNotificationCubit>().editViewedNotification(
+        widget.item.id,
+      );
+
+      // Trigger local Optimistic UI update instantly
+      if (mounted) {
+        context.read<NotificationSocketCubit>().markAsReadLocally(
+          widget.item.id,
+        );
+        // Trigger badge count refresh
+        context.read<GetUnreadCountCubit>().getUnreadCount();
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
+    final Color iconColor = _getIconColor(widget.item.type);
+    final IconData iconData = _getIcon(widget.item.type);
+
     return GestureDetector(
-      onTap: () {
-        if (!item.isRead) {
-          // Trigger REST patch call
-          context.read<EditViewedNotificationCubit>().editViewedNotification(item.id);
-          // Trigger local Optimistic UI update instantly
-          context.read<NotificationSocketCubit>().markAsReadLocally(item.id);
-          // Trigger badge count refresh
-          context.read<GetUnreadCountCubit>().getUnreadCount();
-        }
+      onTapDown: (_) => _animationController.forward(),
+      onTapUp: (_) {
+        _animationController.reverse();
+        _handleTap();
       },
-      child: GlassPanel(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        border: item.isRead
-            ? null
-            : Border.all(
-                color: theme.colorScheme.primary.withValues(alpha: isDark ? 0.35 : 0.2),
-                width: 1.5,
-              ),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: _getIconColor(item.type).withValues(alpha: 0.12),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                _getIcon(item.type),
-                color: _getIconColor(item.type),
-                size: 20,
-              ),
+      onTapCancel: () => _animationController.reverse(),
+      child: ScaleTransition(
+        scale: _scaleAnimation,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          decoration: BoxDecoration(
+            color: widget.item.isRead
+                ? theme.colorScheme.surface
+                : (isDark
+                      ? theme.colorScheme.primary.withValues(alpha: 0.05)
+                      : theme.colorScheme.primary.withValues(alpha: 0.03)),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: widget.item.isRead
+                  ? theme.dividerColor.withValues(alpha: 0.1)
+                  : theme.colorScheme.primary.withValues(alpha: 0.2),
+              width: widget.item.isRead ? 1 : 1.5,
             ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    item.type,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      fontWeight: item.isRead ? FontWeight.w500 : FontWeight.bold,
-                      color: item.isRead ? theme.hintColor : theme.textTheme.bodyLarge?.color,
+            boxShadow: widget.item.isRead
+                ? []
+                : [
+                    BoxShadow(
+                      color: theme.colorScheme.primary.withValues(alpha: 0.05),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
                     ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    item.message,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: item.isRead
-                          ? theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.6)
-                          : theme.textTheme.bodyMedium?.color,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    item.formattedDate,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.hintColor,
-                      fontSize: 10,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            if (!item.isRead)
+                  ],
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
               Container(
-                width: 8,
-                height: 8,
+                padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.primary,
+                  color: widget.item.isRead
+                      ? theme.disabledColor.withValues(alpha: 0.1)
+                      : iconColor.withValues(alpha: 0.15),
                   shape: BoxShape.circle,
                 ),
+                child: Icon(
+                  iconData,
+                  color: widget.item.isRead
+                      ? theme.hintColor.withValues(alpha: 0.6)
+                      : iconColor,
+                  size: 22,
+                ),
               ),
-          ],
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            widget.item.type,
+                            style: theme.textTheme.titleSmall?.copyWith(
+                              fontWeight: widget.item.isRead
+                                  ? FontWeight.w600
+                                  : FontWeight.bold,
+                              color: widget.item.isRead
+                                  ? theme.hintColor
+                                  : theme.textTheme.titleMedium?.color,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        if (!widget.item.isRead) ...[
+                          const SizedBox(width: 8),
+                          if (_isLoading)
+                            SizedBox(
+                              width: 12,
+                              height: 12,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: theme.colorScheme.primary,
+                              ),
+                            )
+                          else
+                            Container(
+                              width: 10,
+                              height: 10,
+                              decoration: BoxDecoration(
+                                color: theme.colorScheme.primary,
+                                shape: BoxShape.circle,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: theme.colorScheme.primary.withValues(
+                                      alpha: 0.4,
+                                    ),
+                                    blurRadius: 6,
+                                  ),
+                                ],
+                              ),
+                            ),
+                        ],
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      widget.item.message,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: widget.item.isRead
+                            ? theme.textTheme.bodyMedium?.color?.withValues(
+                                alpha: 0.6,
+                              )
+                            : theme.textTheme.bodyMedium?.color,
+                        height: 1.4,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.access_time_rounded,
+                          size: 12,
+                          color: theme.hintColor.withValues(alpha: 0.7),
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          widget.item.formattedDate,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.hintColor.withValues(alpha: 0.8),
+                            fontSize: 11,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -274,9 +408,9 @@ class _NotificationItem extends StatelessWidget {
 
   IconData _getIcon(String type) {
     final lowerType = type.toLowerCase();
-    if (lowerType.contains('task')) return Icons.assignment_outlined;
-    if (lowerType.contains('project')) return Icons.folder_outlined;
-    return Icons.notifications_none_rounded;
+    if (lowerType.contains('task')) return Icons.task_alt_rounded;
+    if (lowerType.contains('project')) return Icons.folder_special_rounded;
+    return Icons.notifications_active_rounded;
   }
 
   Color _getIconColor(String type) {

@@ -56,7 +56,6 @@ class RegisterCubit extends Cubit<RegisterState> {
     } on DioException catch (e) {
       final errorMessage =
           e.response?.data?['errors'][0]['msg'] ?? 'Something went wrong';
-      print(errorMessage);
       emit(RegisterError(errorMessage));
     } catch (e) {
       emit(RegisterError('Unexpected error occurred'));

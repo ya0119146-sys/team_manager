@@ -10,6 +10,8 @@ import 'package:team_manager/features/auth/widgets/custom_scafold_messanger.dart
 import 'package:team_manager/features/auth/widgets/header.dart';
 import 'package:team_manager/features/auth/widgets/log_in_card.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:team_manager/features/home/cubit/get_user_profile_cubit/get_user_profile_cubit.dart';
+
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
@@ -23,6 +25,7 @@ class LoginScreen extends StatelessWidget {
       listener: (context, state) {
         if (state is LoginSuccess) {
           TextInput.finishAutofillContext();
+          BlocProvider.of<GetUserProfileCubit>(context).getUserProfile();
           customScafoldMessenger(
             context,
             'login successfully'.tr(),

@@ -1,7 +1,9 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:team_manager/core/helpers/cache_helper.dart';
 import 'package:team_manager/core/helpers/dio_helper.dart';
 import 'package:team_manager/core/helpers/secure_storage_helper.dart';
+import 'package:team_manager/features/home/cubit/get_user_profile_cubit/get_user_profile_cubit.dart';
 import 'login_state.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -30,6 +32,7 @@ class LoginCubit extends Cubit<LoginState> {
           await SecureStorageHelper.saveToken(token);
           // Bridge: sync flag for the router
           await CacheHelper.setBool(key: 'auth_active', value: true);
+
           await DioHelper.init();
         }
 
@@ -46,11 +49,13 @@ class LoginCubit extends Cubit<LoginState> {
     } on DioException catch (e) {
       emit(
         LoginError(
-          e.response?.data['errors'][0]['msg'].toString() ?? 'Login error',
+          e.response?.data['errors']?[0]?['msg']?.toString() ??
+              e.message ??
+              'Login error',
         ),
       );
     } catch (e) {
-      emit(LoginError('Unexpected error'));
+      emit(LoginError(e.toString()));
     }
   }
 }
