@@ -8,10 +8,12 @@ import 'package:team_manager/core/helpers/cache_helper.dart';
 import 'package:team_manager/core/helpers/secure_storage_helper.dart';
 import 'package:team_manager/core/widgets/glass_button.dart';
 import 'package:team_manager/core/widgets/status_chip.dart';
+import 'package:team_manager/core/widgets/custom_dropdown.dart';
 import 'package:team_manager/features/home/cubit/get_admin_dashboard_cubit/get_admin_dashboard_cubit.dart';
 import 'package:team_manager/features/home/cubit/get_user_task_cubit/get_user_task_cubit.dart';
 import 'package:team_manager/features/home/cubit/update_task_status_cubit/update_task_status_cubit.dart';
 import 'package:team_manager/features/home/cubit/update_task_status_cubit/update_task_status_state.dart';
+import 'package:team_manager/features/home/models/attachment_model.dart';
 import 'package:team_manager/features/home/models/task_model.dart';
 import 'package:team_manager/features/home/cubit/delte_attachment_cubit/delete_attachment_cubit.dart';
 import 'package:team_manager/features/home/cubit/delte_attachment_cubit/delete_attachment_state.dart';
@@ -23,7 +25,6 @@ import 'package:easy_localization/easy_localization.dart';
 class TaskDetailsBottomSheet extends StatefulWidget {
   final TaskModel task;
   final VoidCallback onUpdated;
-
   const TaskDetailsBottomSheet({
     super.key,
     required this.task,
@@ -325,15 +326,17 @@ class _TaskDetailsBottomSheetState extends State<TaskDetailsBottomSheet> {
                   const SizedBox(height: 20),
 
                   // ── Attachments section ────────────────────────────────
-                  _SectionHeader(
-                    icon: Icons.attach_file_rounded,
-                    title: 'Deliverables & Attachments'.tr(),
-                    theme: theme,
-                  ),
-                  const SizedBox(height: 10),
-
-                  widget.task.attachments.isEmpty
-                      ? Container(
+                  if (widget.task.memberAttachment.isEmpty &&
+                      widget.task.adminAttachment.isEmpty)
+                    Column(
+                      children: [
+                        _SectionHeader(
+                          icon: Icons.attach_file_rounded,
+                          title: 'Deliverables & Attachments'.tr(),
+                          theme: theme,
+                        ),
+                        const SizedBox(height: 10),
+                        Container(
                           padding: const EdgeInsets.symmetric(
                             vertical: 14,
                             horizontal: 16,
@@ -354,169 +357,40 @@ class _TaskDetailsBottomSheetState extends State<TaskDetailsBottomSheet> {
                                 size: 18,
                               ),
                               const SizedBox(width: 10),
-                              Text(
-                                'No files uploaded yet.'.tr(),
-                                style: theme.textTheme.bodyMedium?.copyWith(
-                                  color: theme.hintColor,
+                              Expanded(
+                                child: Text(
+                                  'No files uploaded yet.'.tr(),
+                                  style: theme.textTheme.bodyMedium?.copyWith(
+                                    color: theme.hintColor,
+                                  ),
                                 ),
                               ),
                             ],
                           ),
-                        )
-                      : ListView.separated(
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          itemCount: widget.task.attachments.length,
-                          separatorBuilder: (_, __) =>
-                              const SizedBox(height: 6),
-                          itemBuilder: (context, index) {
-                            final file = widget.task.attachments[index];
-                            final format = file.format ?? 'file';
-                            final isImage =
-                                format.contains('image') ||
-                                format.contains('png') ||
-                                format.contains('jpg') ||
-                                format.contains('jpeg');
-
-                            return Container(
-                              decoration: BoxDecoration(
-                                color: isDark
-                                    ? theme.colorScheme.surfaceContainerHighest
-                                          .withValues(alpha: 0.4)
-                                    : theme.colorScheme.surfaceContainerHighest
-                                          .withValues(alpha: 0.6),
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(
-                                  color: theme.dividerColor.withValues(
-                                    alpha: 0.3,
-                                  ),
-                                ),
-                              ),
-                              child: ListTile(
-                                contentPadding: const EdgeInsets.symmetric(
-                                  horizontal: 14,
-                                  vertical: 4,
-                                ),
-                                leading: Container(
-                                  width: 38,
-                                  height: 38,
-                                  decoration: BoxDecoration(
-                                    color: cardColor.withValues(alpha: 0.15),
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  child: Icon(
-                                    isImage
-                                        ? Icons.image_rounded
-                                        : Icons.insert_drive_file_rounded,
-                                    color: cardColor,
-                                    size: 20,
-                                  ),
-                                ),
-                                title: Text(
-                                  file.publicId.split('/').last,
-                                  style: theme.textTheme.bodySmall?.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                subtitle: Text(
-                                  file.secureUrl,
-                                  style: TextStyle(
-                                    fontSize: 10,
-                                    color: theme.hintColor,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                trailing: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    BlocConsumer<
-                                      DeleteAttachmentCubit,
-                                      DeleteAttachmentState
-                                    >(
-                                      bloc: _deleteAttachmentCubit,
-                                      listenWhen: (previous, current) =>
-                                          current is DeleteAttachmentSuccess ||
-                                          current is DeleteAttachmentError,
-                                      listener: (context, state) {
-                                        if (state is DeleteAttachmentSuccess) {
-                                          customScafoldMessenger(
-                                            context,
-                                            "Attachment deleted successfully"
-                                                .tr(),
-                                            color: Colors.green,
-                                          );
-                                          widget.onUpdated();
-                                          Navigator.pop(context);
-                                        } else if (state
-                                            is DeleteAttachmentError) {
-                                          customScafoldMessenger(
-                                            context,
-                                            state.message,
-                                            color: Colors.red,
-                                          );
-                                        }
-                                      },
-                                      builder: (context, state) {
-                                        if (state is DeleteAttachmentLoading) {
-                                          return const Padding(
-                                            padding: EdgeInsets.symmetric(
-                                              horizontal: 12.0,
-                                            ),
-                                            child: SizedBox(
-                                              width: 18,
-                                              height: 18,
-                                              child: CircularProgressIndicator(
-                                                strokeWidth: 2,
-                                              ),
-                                            ),
-                                          );
-                                        }
-                                        return IconButton(
-                                          icon: const Icon(
-                                            Icons.delete_outline,
-                                            size: 18,
-                                            color: Colors.red,
-                                          ),
-                                          onPressed: () {
-                                            _deleteAttachmentCubit
-                                                .deleteAttachment(
-                                                  projectId:
-                                                      widget.task.projectId ??
-                                                      '',
-                                                  publicId: file.publicId,
-                                                );
-                                          },
-                                          tooltip: 'Delete file'.tr(),
-                                        );
-                                      },
-                                    ),
-                                    IconButton(
-                                      icon: const Icon(
-                                        Icons.download_rounded,
-                                        size: 18,
-                                      ),
-                                      onPressed: () => _downloadFile(
-                                        context,
-                                        file.secureUrl,
-                                        file.publicId.split('/').last,
-                                      ),
-                                      tooltip: 'Download file',
-                                    ),
-                                  ],
-                                ),
-                                onTap: () => _downloadFile(
-                                  context,
-                                  file.secureUrl,
-                                  file.publicId.split('/').last,
-                                ),
-                              ),
-                            );
-                          },
                         ),
-                  const SizedBox(height: 24),
+                      ],
+                    )
+                  else ...[
+                    if (widget.task.memberAttachment.isNotEmpty)
+                      _buildAttachmentsList(
+                        widget.task.memberAttachment,
+                        'Member Attachments'.tr(),
+                        Icons.person_outline_rounded,
+                        theme,
+                        isDark,
+                        cardColor,
+                      ),
+                    if (widget.task.adminAttachment.isNotEmpty)
+                      _buildAttachmentsList(
+                        widget.task.adminAttachment,
+                        'Admin Attachments'.tr(),
+                        Icons.admin_panel_settings_outlined,
+                        theme,
+                        isDark,
+                        cardColor,
+                      ),
+                  ],
+                  const SizedBox(height: 12),
 
                   // ── Status Update section ─────────────────────────────
                   if (_canEditStatus) ...[
@@ -524,7 +398,7 @@ class _TaskDetailsBottomSheetState extends State<TaskDetailsBottomSheet> {
                       color: theme.dividerColor.withValues(alpha: 0.3),
                       height: 1,
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 12),
                     _SectionHeader(
                       icon: Icons.autorenew_rounded,
                       title: 'Update Task Status'.tr(),
@@ -580,19 +454,18 @@ class _TaskDetailsBottomSheetState extends State<TaskDetailsBottomSheet> {
                     ],
 
                     // Status Dropdown
-                    _StatusSelector(
-                      selectedStatus: _selectedStatus,
-                      availableStatuses: availableStatuses,
-                      theme: theme,
-                      isDark: isDark,
+                    CustomDropdown<String>(
+                      initialValue: _selectedStatus,
+                      items: availableStatuses
+                          .map((s) => DropdownItem(value: s, label: s))
+                          .toList(),
                       onChanged: (value) {
-                        if (value != null) {
-                          setState(() {
-                            _selectedStatus = value;
-                            if (!_requiresFiles) _pickedFiles = [];
-                          });
-                        }
+                        setState(() {
+                          _selectedStatus = value;
+                          if (!_requiresFiles) _pickedFiles = [];
+                        });
                       },
+                      prefixIcon: Icons.flag_outlined,
                     ),
                     const SizedBox(height: 16),
 
@@ -696,6 +569,180 @@ class _TaskDetailsBottomSheetState extends State<TaskDetailsBottomSheet> {
       },
     );
   }
+
+  Widget _buildAttachmentsList(
+    List<AttachmentModel> attachments,
+    String title,
+    IconData icon,
+    ThemeData theme,
+    bool isDark,
+    Color cardColor,
+  ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _SectionHeader(icon: icon, title: title, theme: theme),
+        const SizedBox(height: 10),
+        ListView.separated(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: attachments.length,
+          separatorBuilder: (_, __) => const SizedBox(height: 6),
+          itemBuilder: (context, index) {
+            final file = attachments[index];
+            final format = file.format ?? 'file';
+            final isImage =
+                format.contains('image') ||
+                format.contains('png') ||
+                format.contains('jpg') ||
+                format.contains('jpeg');
+
+            return Container(
+              decoration: BoxDecoration(
+                color: isDark
+                    ? theme.colorScheme.surfaceContainerHighest.withValues(
+                        alpha: 0.4,
+                      )
+                    : theme.colorScheme.surfaceContainerHighest.withValues(
+                        alpha: 0.6,
+                      ),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: theme.dividerColor.withValues(alpha: 0.3),
+                ),
+              ),
+              child: ListTile(
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 4,
+                ),
+                leading: Container(
+                  width: 38,
+                  height: 38,
+                  decoration: BoxDecoration(
+                    color: cardColor.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(
+                    isImage
+                        ? Icons.image_rounded
+                        : Icons.insert_drive_file_rounded,
+                    color: cardColor,
+                    size: 20,
+                  ),
+                ),
+                title: Text(
+                  file.publicId.split('/').last,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                subtitle: Text(
+                  file.secureUrl,
+                  style: TextStyle(fontSize: 10, color: theme.hintColor),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (CacheHelper.getData(
+                          key: 'role',
+                        )?.toString().toLowerCase() ==
+                        'admin')
+                      BlocConsumer<
+                        DeleteAttachmentCubit,
+                        DeleteAttachmentState
+                      >(
+                        bloc: _deleteAttachmentCubit,
+                        listenWhen: (previous, current) {
+                          if (current is DeleteAttachmentSuccess) {
+                            return current.publicId == file.publicId;
+                          } else if (current is DeleteAttachmentError) {
+                            return current.publicId == file.publicId;
+                          }
+                          return false;
+                        },
+                        listener: (context, state) {
+                          if (state is DeleteAttachmentSuccess) {
+                            customScafoldMessenger(
+                              context,
+                              "Attachment deleted successfully".tr(),
+                              color: Colors.green,
+                            );
+
+                            setState(() {
+                              widget.task.adminAttachment
+                                  .removeWhere((a) => a.publicId == state.publicId);
+                              widget.task.memberAttachment
+                                  .removeWhere((a) => a.publicId == state.publicId);
+                            });
+
+                            widget.onUpdated();
+                          } else if (state is DeleteAttachmentError) {
+                            customScafoldMessenger(
+                              context,
+                              state.message,
+                              color: Colors.red,
+                            );
+                          }
+                        },
+                        builder: (context, state) {
+                          if (state is DeleteAttachmentLoading && state.publicId == file.publicId) {
+                            return const Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 12.0),
+                              child: SizedBox(
+                                width: 18,
+                                height: 18,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              ),
+                            );
+                          }
+                          return IconButton(
+                            icon: const Icon(
+                              Icons.delete_outline,
+                              size: 18,
+                              color: Colors.red,
+                            ),
+                            onPressed: () {
+                              _deleteAttachmentCubit.deleteAttachment(
+                                projectId: widget.task.projectId ?? '',
+                                publicId: file.publicId,
+                                taskId: widget.task.id,
+                              );
+                            },
+                            tooltip: 'Delete file'.tr(),
+                          );
+                        },
+                      ),
+                    IconButton(
+                      icon: const Icon(Icons.download_rounded, size: 18),
+                      onPressed: () => _downloadFile(
+                        context,
+                        file.secureUrl,
+                        file.publicId.split('/').last,
+                      ),
+                      tooltip: 'Download file',
+                    ),
+                  ],
+                ),
+                onTap: () => _downloadFile(
+                  context,
+                  file.secureUrl,
+                  file.publicId.split('/').last,
+                ),
+              ),
+            );
+          },
+        ),
+        const SizedBox(height: 16),
+      ],
+    );
+  }
 }
 
 // ── Reusable Sub-widgets ─────────────────────────────────────────────────────
@@ -738,11 +785,15 @@ class _InfoCard extends StatelessWidget {
               children: [
                 Icon(icon, size: 13, color: color),
                 const SizedBox(width: 5),
-                Text(
-                  label,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.hintColor,
-                    fontSize: 11,
+                Expanded(
+                  child: Text(
+                    label,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.hintColor,
+                      fontSize: 11,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ],
@@ -804,113 +855,6 @@ class _SectionHeader extends StatelessWidget {
           ],
         ),
       ],
-    );
-  }
-}
-
-class _StatusSelector extends StatelessWidget {
-  final String selectedStatus;
-  final List<String> availableStatuses;
-  final ThemeData theme;
-  final bool isDark;
-  final ValueChanged<String?> onChanged;
-
-  const _StatusSelector({
-    required this.selectedStatus,
-    required this.availableStatuses,
-    required this.theme,
-    required this.isDark,
-    required this.onChanged,
-  });
-
-  Color _statusColor(String status) {
-    switch (status.toLowerCase()) {
-      case 'pending':
-        return const Color(0xFFF59E0B);
-      case 'in-progress':
-        return const Color(0xFF3B82F6);
-      case 'reviewing':
-        return const Color(0xFF8B5CF6);
-      case 'done':
-        return const Color(0xFF22C55E);
-      case 'accepted':
-        return const Color(0xFF10B981);
-      default:
-        return const Color(0xFF6B7280);
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final effectiveStatus = availableStatuses.contains(selectedStatus)
-        ? selectedStatus
-        : availableStatuses.first;
-
-    final statusColor = _statusColor(effectiveStatus);
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
-      decoration: BoxDecoration(
-        color: isDark
-            ? theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.4)
-            : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.6),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(
-          color: statusColor.withValues(alpha: 0.4),
-          width: 1.5,
-        ),
-      ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<String>(
-          value: effectiveStatus,
-          isExpanded: true,
-          dropdownColor: theme.colorScheme.surface,
-          style: theme.textTheme.bodyMedium,
-          icon: Icon(Icons.keyboard_arrow_down_rounded, color: statusColor),
-          selectedItemBuilder: (_) => availableStatuses
-              .map(
-                (s) => Row(
-                  children: [
-                    Container(
-                      width: 8,
-                      height: 8,
-                      decoration: BoxDecoration(
-                        color: _statusColor(s),
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      s,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: _statusColor(s),
-                      ),
-                    ),
-                  ],
-                ),
-              )
-              .toList(),
-          onChanged: onChanged,
-          items: availableStatuses.map((status) {
-            final c = _statusColor(status);
-            return DropdownMenuItem<String>(
-              value: status,
-              child: Row(
-                children: [
-                  Container(
-                    width: 8,
-                    height: 8,
-                    decoration: BoxDecoration(color: c, shape: BoxShape.circle),
-                  ),
-                  const SizedBox(width: 10),
-                  Text(status),
-                ],
-              ),
-            );
-          }).toList(),
-        ),
-      ),
     );
   }
 }

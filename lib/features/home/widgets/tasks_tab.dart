@@ -61,10 +61,12 @@ class _TasksTabState extends State<TasksTab> {
                   Text(state.error, style: const TextStyle(color: Colors.red)),
                   const SizedBox(height: 16),
                   GlassButton(
-                    label: 'reload',
+                    label: 'Add Task',
                     onPressed: () {
-                      context.read<GetProjectTasksCubit>().getProjectTasks(
-                        projectId: widget.project.id,
+                      showDialog(
+                        context: context,
+                        builder: (context) =>
+                            CreateNewTaskDialog(projectModel: widget.project),
                       );
                     },
                   ),
@@ -84,6 +86,16 @@ class _TasksTabState extends State<TasksTab> {
                     icon: Icons.task_alt_outlined,
                     title: 'No tasks added yet',
                     subtitle: 'Add a new task to this project to get started.',
+                  ),
+                  GlassButton(
+                    label: 'Add Task',
+                    onPressed: () {
+                      showDialog(
+                        context: context,
+                        builder: (context) =>
+                            CreateNewTaskDialog(projectModel: widget.project),
+                      );
+                    },
                   ),
                 ],
               ),

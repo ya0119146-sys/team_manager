@@ -17,6 +17,7 @@ class LoginCard extends StatefulWidget {
 
 class _LoginCardState extends State<LoginCard> {
   bool isClicked = false;
+  bool isPasswordObscured = true;
   final formKey = GlobalKey<FormState>();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
@@ -29,9 +30,11 @@ class _LoginCardState extends State<LoginCard> {
   }
 
   String? _validatePassword(String? value) {
-    if (value == null || value.trim().isEmpty) return 'Password is required'.tr();
+    if (value == null || value.trim().isEmpty)
+      return 'Password is required'.tr();
     return null;
   }
+
   @override
   void dispose() {
     emailController.dispose();
@@ -51,107 +54,122 @@ class _LoginCardState extends State<LoginCard> {
         autovalidateMode: AutovalidateMode.onUserInteraction,
         child: AutofillGroup(
           child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Welcome Back'.tr(),
-              style: theme.textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.w900,
-                letterSpacing: -0.5,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Welcome Back'.tr(),
+                style: theme.textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: -0.5,
+                ),
               ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Sign in to your account to continue'.tr(),
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+              const SizedBox(height: 8),
+              Text(
+                'Sign in to your account to continue'.tr(),
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                ),
               ),
-            ),
-            const SizedBox(height: 32),
-            InputLabel(text: 'Email'.tr()),
-            GlassInputField(
-              controller: emailController,
-              hint: 'Enter your email'.tr(),
-              keyboardType: TextInputType.emailAddress,
-              autofillHints: const [AutofillHints.email],
-              validator: _validateEmail,
-            ),
-            const SizedBox(height: 14),
-            InputLabel(text: 'Password'.tr()),
-            GlassInputField(
-              controller: passwordController,
-              hint: 'Enter your password'.tr(),
-              obscure: true,
-              autofillHints: const [AutofillHints.password],
-              validator: _validatePassword,
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Checkbox(
-                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  value: isClicked,
-                  onChanged: (_) {
+              const SizedBox(height: 20),
+              InputLabel(text: 'Email'.tr()),
+              GlassInputField(
+                controller: emailController,
+                hint: 'Enter your email'.tr(),
+                keyboardType: TextInputType.emailAddress,
+                autofillHints: const [AutofillHints.email],
+                validator: _validateEmail,
+              ),
+              const SizedBox(height: 14),
+              InputLabel(text: 'Password'.tr()),
+              GlassInputField(
+                controller: passwordController,
+                hint: 'Enter your password'.tr(),
+                obscure: isPasswordObscured,
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    isPasswordObscured
+                        ? Icons.visibility_off
+                        : Icons.visibility,
+                    size: 22,
+                  ),
+                  onPressed: () {
                     setState(() {
-                      isClicked = !isClicked;
+                      isPasswordObscured = !isPasswordObscured;
                     });
                   },
                 ),
-                Text('Remember me'.tr(), style: theme.textTheme.bodySmall),
-                const Spacer(),
-                TextButton(
-                  onPressed: () {
-                    GoRouter.of(context).push(AppRouter.kForgotPasswordScreen);
-                  },
-                  child: Text(
-                    'Forgot password?'.tr(),
-                    style: theme.textTheme.labelMedium?.copyWith(
-                      color: theme.colorScheme.primary,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 24),
-            GlassButton(
-              label: 'Sign In'.tr(),
-              onPressed: () {
-                if (formKey.currentState!.validate()) {
-                  authCubit.login(
-                    email: emailController.text,
-                    password: passwordController.text,
-                  );
-                }
-              },
-            ),
-            const SizedBox(height: 32),
-            // Row(
-            //   children: [
-            //     Expanded(child: OutlinedBtn(text: 'Login as Admin')),
-            //     const SizedBox(width: 12),
-            //     Expanded(child: OutlinedBtn(text: 'Login as Member')),
-            //   ],
-            // ),
-            Center(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+                autofillHints: const [AutofillHints.password],
+                validator: _validatePassword,
+              ),
+              const SizedBox(height: 8),
+              Row(
                 children: [
-                  Text(
-                    "Don't have an account?".tr(),
-                    style: theme.textTheme.bodyMedium,
-                  ),
+                  // Checkbox(
+                  //   materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  //   value: isClicked,
+                  //   onChanged: (_) {
+                  //     setState(() {
+                  //       isClicked = !isClicked;
+                  //     });
+                  //   },
+                  // ),
+                  // Text('Remember me'.tr(), style: theme.textTheme.bodySmall),
+                  const Spacer(),
                   TextButton(
                     onPressed: () {
-                      GoRouter.of(context).push(AppRouter.kSignUpScreen);
+                      GoRouter.of(
+                        context,
+                      ).push(AppRouter.kForgotPasswordScreen);
                     },
-                    child: Text('Sign up'.tr()),
+                    child: Text(
+                      'Forgot password?'.tr(),
+                      style: theme.textTheme.labelMedium?.copyWith(
+                        color: theme.colorScheme.primary,
+                      ),
+                    ),
                   ),
                 ],
               ),
-            ),
-          ],
+              const SizedBox(height: 12),
+              GlassButton(
+                label: 'Sign In'.tr(),
+                onPressed: () {
+                  if (formKey.currentState!.validate()) {
+                    authCubit.login(
+                      email: emailController.text,
+                      password: passwordController.text,
+                    );
+                  }
+                },
+              ),
+              const SizedBox(height: 24),
+              // Row(
+              //   children: [
+              //     Expanded(child: OutlinedBtn(text: 'Login as Admin')),
+              //     const SizedBox(width: 12),
+              //     Expanded(child: OutlinedBtn(text: 'Login as Member')),
+              //   ],
+              // ),
+              Center(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      "Don't have an account?".tr(),
+                      style: theme.textTheme.bodyMedium,
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        GoRouter.of(context).push(AppRouter.kSignUpScreen);
+                      },
+                      child: Text('Sign up'.tr()),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
-      ),
       ),
     );
   }

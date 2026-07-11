@@ -144,12 +144,18 @@ class _CreateNewTaskDialogState extends State<CreateNewTaskDialog> {
                   color: Colors.green,
                 );
                 GoRouter.of(context).pop();
-                widget.projectModel != null
-                    ? BlocProvider.of<ProjectCubit>(
-                        context,
-                      ).getOneProject(widget.projectModel!.id)
-                    : GetUserTaskCubit.get(context).getUserTask();
-                GetAdminDashboardCubit.get(context).getAdminDashboard();
+
+                if (widget.projectModel != null) {
+                  context.read<ProjectCubit>().getOneProject(
+                    widget.projectModel!.id,
+                  );
+                  context.read<GetProjectTasksCubit>().getProjectTasks(
+                    projectId: widget.projectModel!.id,
+                  );
+                } else {
+                  context.read<GetUserTaskCubit>().getUserTask();
+                  context.read<GetAdminDashboardCubit>().getAdminDashboard();
+                }
               } else if (state is CreateNewTaskError) {
                 customScafoldMessenger(context, state.error, color: Colors.red);
               }

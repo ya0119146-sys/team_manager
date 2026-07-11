@@ -9,18 +9,25 @@ class DeleteAttachmentCubit extends Cubit<DeleteAttachmentState> {
   Future<void> deleteAttachment({
     required String projectId,
     required String publicId,
+    String? taskId,
   }) async {
-    emit(DeleteAttachmentLoading());
+    emit(DeleteAttachmentLoading(publicId: publicId));
     try {
+      final encodedPublicId = Uri.encodeComponent(publicId);
+      final url = taskId != null 
+          ? '/api/v1/project/$projectId/task/$taskId/att/$encodedPublicId'
+          : '/api/v1/project/$projectId/att/$encodedPublicId';
+
       final response = await DioHelper.deleteData(
-        url: '/api/v1/project/$projectId/att/$publicId',
+        url: url,
       );
       if (response.statusCode == 200 || response.statusCode == 201) {
-        emit(DeleteAttachmentSuccess());
+        emit(DeleteAttachmentSuccess(publicId: publicId));
       } else {
-        emit(DeleteAttachmentError(message: 'Failed to delete attachment'));
+        emit(DeleteAttachmentError(message: 'Failed to delete attachment', publicId: publicId));
       }
     } on DioException catch (e) {
+      print("delete attachment cubit error: ${e.response}");
       emit(
         DeleteAttachmentError(
           message:
@@ -28,10 +35,11 @@ class DeleteAttachmentCubit extends Cubit<DeleteAttachmentState> {
               e.response?.data['errors'][0]['msg'] ??
               e.message ??
               'An error occurred',
+          publicId: publicId,
         ),
       );
     } catch (e) {
-      emit(DeleteAttachmentError(message: e.toString()));
+      emit(DeleteAttachmentError(message: e.toString(), publicId: publicId));
     }
   }
 }

@@ -7,12 +7,12 @@ class EmptyStateWidget extends StatelessWidget {
   final Widget? action;
 
   const EmptyStateWidget({
-    Key? key,
+    super.key,
     required this.icon,
     required this.title,
     required this.subtitle,
     this.action,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -46,10 +46,7 @@ class EmptyStateWidget extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
           ],
-          if (action != null) ...[
-            const SizedBox(height: 24),
-            action!,
-          ],
+          if (action != null) ...[const SizedBox(height: 24), action!],
         ],
       ),
     );

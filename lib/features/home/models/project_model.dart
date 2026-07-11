@@ -48,7 +48,11 @@ class ProjectModel {
   /// 🟢 1️⃣ Get All Projects
   factory ProjectModel.fromProjectsJson(Map<String, dynamic> json) {
     final rawFiles =
-        json['files'] as List? ?? json['attachments'] as List? ?? [];
+        json['files'] as List? ?? 
+        json['attachments'] as List? ?? 
+        json['adminAttachment'] as List? ?? 
+        json['adminAttatchment'] as List? ?? 
+        [];
     final parsedAttachments = rawFiles
         .map((x) => AttachmentModel.fromJson(x))
         .toList();
@@ -85,6 +89,8 @@ class ProjectModel {
     final rawFiles =
         projectData['files'] as List? ??
         projectData['attachments'] as List? ??
+        projectData['adminAttachment'] as List? ??
+        projectData['adminAttatchment'] as List? ??
         [];
     final parsedAttachments = rawFiles
         .map((x) => AttachmentModel.fromJson(x))

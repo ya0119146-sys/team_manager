@@ -13,6 +13,8 @@ import 'package:team_manager/features/home/widgets/get_color.dart';
 import 'package:team_manager/features/auth/widgets/custom_scafold_messanger.dart';
 import 'package:team_manager/core/widgets/glass_input_field.dart';
 import 'package:team_manager/core/widgets/glass_button.dart';
+import 'package:team_manager/core/widgets/custom_dropdown.dart';
+import 'package:team_manager/features/home/cubit/get_admin_dashboard_cubit/get_admin_dashboard_cubit.dart';
 import 'package:team_manager/features/home/widgets/file_selector_widget.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:team_manager/features/home/widgets/status_drop_down_tasks.dart';
@@ -225,96 +227,30 @@ class _UpdateTaskDialogState extends State<UpdateTaskDialog> {
                   // ── Assign To ───────────────────────────────────────────
                   _FieldLabel(label: 'Assign To'.tr(), theme: theme),
                   const SizedBox(height: 8),
-                  StatusDropdownTasks(
+                  CustomDropdown<String>(
                     hint: 'Select member'.tr(),
-                    value: _selectedMember.isNotEmpty ? _selectedMember : null,
-                    items: _usernameMembers,
+                    initialValue: _selectedMember.isNotEmpty ? _selectedMember : null,
+                    items: _usernameMembers
+                        .map((m) => DropdownItem(value: m, label: m))
+                        .toList(),
                     onChanged: (value) =>
-                        setState(() => _selectedMember = value ?? ''),
+                        setState(() => _selectedMember = value),
+                    prefixIcon: Icons.person_outline_rounded,
                   ),
                   const SizedBox(height: 14),
 
                   // ── Status ──────────────────────────────────────────────
                   _FieldLabel(label: 'Status'.tr(), theme: theme),
                   const SizedBox(height: 8),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 14,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: isDark
-                          ? theme.colorScheme.surfaceContainerHighest
-                                .withValues(alpha: 0.4)
-                          : theme.colorScheme.surfaceContainerHighest
-                                .withValues(alpha: 0.6),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: _statusColor(
-                          _selectedStatus,
-                        ).withValues(alpha: 0.4),
-                        width: 1.5,
-                      ),
-                    ),
-                    child: DropdownButtonHideUnderline(
-                      child: DropdownButton<String>(
-                        value: _selectedStatus,
-                        isExpanded: true,
-                        dropdownColor: theme.colorScheme.surface,
-                        style: theme.textTheme.bodyMedium,
-                        icon: Icon(
-                          Icons.keyboard_arrow_down_rounded,
-                          color: _statusColor(_selectedStatus),
-                        ),
-                        selectedItemBuilder: (_) => _allStatuses
-                            .map(
-                              (s) => Row(
-                                children: [
-                                  Container(
-                                    width: 8,
-                                    height: 8,
-                                    decoration: BoxDecoration(
-                                      color: _statusColor(s),
-                                      shape: BoxShape.circle,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    s,
-                                    style: theme.textTheme.bodyMedium?.copyWith(
-                                      fontWeight: FontWeight.w600,
-                                      color: _statusColor(s),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            )
-                            .toList(),
-                        onChanged: (v) {
-                          if (v != null) setState(() => _selectedStatus = v);
-                        },
-                        items: _allStatuses.map((status) {
-                          final c = _statusColor(status);
-                          return DropdownMenuItem<String>(
-                            value: status,
-                            child: Row(
-                              children: [
-                                Container(
-                                  width: 8,
-                                  height: 8,
-                                  decoration: BoxDecoration(
-                                    color: c,
-                                    shape: BoxShape.circle,
-                                  ),
-                                ),
-                                const SizedBox(width: 10),
-                                Text(status),
-                              ],
-                            ),
-                          );
-                        }).toList(),
-                      ),
-                    ),
+                  CustomDropdown<String>(
+                    initialValue: _selectedStatus,
+                    items: _allStatuses
+                        .map((s) => DropdownItem(value: s, label: s))
+                        .toList(),
+                    onChanged: (v) {
+                      setState(() => _selectedStatus = v);
+                    },
+                    prefixIcon: Icons.flag_outlined,
                   ),
                   const SizedBox(height: 20),
 

@@ -358,7 +358,7 @@ class _HomeMainScreenState extends State<HomeMainScreen> {
           children: [
             /// ================= PREMIUM TOP BAR =================
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
               decoration: BoxDecoration(
                 color: theme.scaffoldBackgroundColor,
                 boxShadow: [
@@ -390,15 +390,15 @@ class _HomeMainScreenState extends State<HomeMainScreen> {
                     child: IconButton(
                       icon: Icon(
                         Icons.menu_rounded,
-                        size: 22,
+                        size: 26,
                         color: theme.iconTheme.color,
                       ),
                       onPressed: () => scaffoldKey.currentState?.openDrawer(),
-                      padding: const EdgeInsets.all(0),
+                      padding: const EdgeInsets.all(12),
                       constraints: const BoxConstraints(),
                     ),
                   ),
-                  const SizedBox(width: 16),
+                  const SizedBox(width: 8),
 
                   // Logo Badge
                   GestureDetector(

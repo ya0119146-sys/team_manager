@@ -36,7 +36,7 @@ class DioHelper {
           final statusCode = error.response?.statusCode;
 
           // Token expired / unauthorized
-          if (statusCode == 401 || statusCode == 500) {
+          if (statusCode == 401) {
             await SecureStorageHelper.deleteToken();
             await CacheHelper.removeData(key: 'role');
             await CacheHelper.setBool(key: 'auth_active', value: false);

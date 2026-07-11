@@ -1,6 +1,7 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:team_manager/core/widgets/glass_panel.dart';
+import 'package:team_manager/core/widgets/custom_dropdown.dart';
 import 'package:team_manager/features/home/models/dashboard_model.dart';
 
 class TaskStatesDashboard extends StatefulWidget {
@@ -375,63 +376,22 @@ class _TaskStatesDashboardState extends State<TaskStatesDashboard>
 
   Widget _buildDropdown(
       ThemeData theme, bool isDark, List<DashboardProjectModel> projects) {
-    return Container(
-      constraints: const BoxConstraints(maxWidth: 140),
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
-      decoration: BoxDecoration(
-        color: isDark
-            ? Colors.white.withValues(alpha: 0.07)
-            : Colors.black.withValues(alpha: 0.04),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: theme.dividerColor.withValues(alpha: 0.3),
-          width: 1,
-        ),
-      ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<String>(
-          value: _selectedFilter,
-          icon: Icon(Icons.expand_more_rounded,
-              color: theme.hintColor, size: 18),
-          dropdownColor: isDark
-              ? const Color(0xFF1E293B)
-              : Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          style: theme.textTheme.bodySmall?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
-          onChanged: (String? newValue) {
-            if (newValue != null) _setFilter(newValue);
-          },
-          items: [
-            DropdownMenuItem(
-              value: 'all',
-              child: Text(
-                'All Projects',
-                style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w600,
-                  color: theme.textTheme.bodySmall?.color,
-                ),
-              ),
-            ),
-            ...projects.map((proj) {
-              return DropdownMenuItem(
+    return SizedBox(
+      width: 140,
+      child: CustomDropdown<String>(
+        initialValue: _selectedFilter,
+        items: [
+          DropdownItem<String>(value: 'all', label: 'All Projects'),
+          ...projects.map((proj) => DropdownItem<String>(
                 value: proj.id,
-                child: Text(
-                  proj.name,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600,
-                    color: theme.textTheme.bodySmall?.color,
-                  ),
-                ),
-              );
-            }),
-          ],
-        ),
+                label: proj.name,
+              )),
+        ],
+        onChanged: (String newValue) {
+          _setFilter(newValue);
+        },
+        fontSize: 11,
+        prefixIcon: Icons.filter_alt_outlined,
       ),
     );
   }

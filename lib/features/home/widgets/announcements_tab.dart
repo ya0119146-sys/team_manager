@@ -482,10 +482,13 @@ class _AnnouncementCardState extends State<_AnnouncementCard>
                           shrinkWrap: true,
                           physics: const NeverScrollableScrollPhysics(),
                           itemCount: msg.files.length,
-                          separatorBuilder: (context, index) => const SizedBox(height: 8),
+                          separatorBuilder: (context, index) =>
+                              const SizedBox(height: 8),
                           itemBuilder: (context, index) {
                             final file = msg.files[index];
-                            final fileName = file['public_id']?.split('/').last ?? 'Attachment';
+                            final fileName =
+                                file['public_id']?.split('/').last ??
+                                'Attachment';
                             return InkWell(
                               onTap: () => _downloadFile(
                                 context,
@@ -497,11 +500,17 @@ class _AnnouncementCardState extends State<_AnnouncementCard>
                                 padding: const EdgeInsets.all(12),
                                 decoration: BoxDecoration(
                                   color: isDark
-                                      ? const Color(0xFF8B5CF6).withValues(alpha: 0.1)
-                                      : const Color(0xFF8B5CF6).withValues(alpha: 0.05),
+                                      ? const Color(
+                                          0xFF8B5CF6,
+                                        ).withValues(alpha: 0.1)
+                                      : const Color(
+                                          0xFF8B5CF6,
+                                        ).withValues(alpha: 0.05),
                                   borderRadius: BorderRadius.circular(12),
                                   border: Border.all(
-                                    color: const Color(0xFF8B5CF6).withValues(alpha: 0.2),
+                                    color: const Color(
+                                      0xFF8B5CF6,
+                                    ).withValues(alpha: 0.2),
                                   ),
                                 ),
                                 child: Row(
@@ -509,7 +518,9 @@ class _AnnouncementCardState extends State<_AnnouncementCard>
                                     Container(
                                       padding: const EdgeInsets.all(8),
                                       decoration: BoxDecoration(
-                                        color: const Color(0xFF8B5CF6).withValues(alpha: 0.15),
+                                        color: const Color(
+                                          0xFF8B5CF6,
+                                        ).withValues(alpha: 0.15),
                                         borderRadius: BorderRadius.circular(8),
                                       ),
                                       child: const Icon(
@@ -522,10 +533,13 @@ class _AnnouncementCardState extends State<_AnnouncementCard>
                                     Expanded(
                                       child: Text(
                                         fileName,
-                                        style: theme.textTheme.bodyMedium?.copyWith(
-                                          fontWeight: FontWeight.w600,
-                                          color: isDark ? Colors.white : Colors.black87,
-                                        ),
+                                        style: theme.textTheme.bodyMedium
+                                            ?.copyWith(
+                                              fontWeight: FontWeight.w600,
+                                              color: isDark
+                                                  ? Colors.white
+                                                  : Colors.black87,
+                                            ),
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
                                       ),

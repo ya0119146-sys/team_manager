@@ -14,7 +14,8 @@ class TaskModel {
   final String? projectId;
   final String? projectName;
   final List<String> projectMembers;
-  final List<AttachmentModel> attachments;
+  final List<AttachmentModel> adminAttachment;
+  final List<AttachmentModel> memberAttachment;
 
   TaskModel({
     required this.id,
@@ -30,17 +31,30 @@ class TaskModel {
     this.projectId,
     this.projectName,
     required this.projectMembers,
-    this.attachments = const [],
+    this.adminAttachment = const [],
+    this.memberAttachment = const [],
   });
 
-  factory TaskModel.fromJson(Map<String, dynamic> json, {String? projectIdOverride}) {
+  factory TaskModel.fromJson(
+    Map<String, dynamic> json, {
+    String? projectIdOverride,
+  }) {
     final project = json['project'];
-    final rawFiles =
-        json['files'] as List? ?? json['attachments'] as List? ?? [];
-    final parsedAttachments = rawFiles
+    final rawMemberFiles = json['memberAttachment'] as List? ?? 
+        json['memberAttatchment'] as List? ??
+        json['files'] as List? ?? 
+        json['attachments'] as List? ?? 
+        [];
+    final memberParsedAttachments = rawMemberFiles
         .map((x) => AttachmentModel.fromJson(x))
         .toList();
 
+    final rawAdminFiles = json['adminAttachment'] as List? ?? 
+        json['adminAttatchment'] as List? ?? 
+        [];
+    final adminParsedAttachments = rawAdminFiles
+        .map((x) => AttachmentModel.fromJson(x))
+        .toList();
     return TaskModel(
       id: json['_id']?.toString() ?? '',
       name: json['name']?.toString() ?? 'No Name',
@@ -64,12 +78,15 @@ class TaskModel {
       color: json['color']?.toString() ?? '',
       usernameMember: json['usernameMember']?.toString() ?? '',
       usernameAdmin: json['usernameAdmin']?.toString() ?? '',
-      projectId: projectIdOverride ?? (project != null ? project['_id']?.toString() : null),
+      projectId:
+          projectIdOverride ??
+          (project != null ? project['_id']?.toString() : null),
       projectName: project != null ? project['name']?.toString() : null,
       projectMembers: project != null
           ? List<String>.from(project['usernameMember'] ?? [])
           : [],
-      attachments: parsedAttachments,
+      adminAttachment: adminParsedAttachments,
+      memberAttachment: memberParsedAttachments,
     );
   }
 }

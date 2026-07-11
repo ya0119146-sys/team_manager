@@ -105,10 +105,10 @@ class _OverviewTabState extends State<OverviewTab> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildTaskOverviewCard(context),
-          if (widget.project.attachments.isNotEmpty) ...[
-            const SizedBox(height: 16),
-            _buildAttachmentsCard(context),
-          ],
+          // if (widget.project.attachments.isNotEmpty) ...[
+          const SizedBox(height: 16),
+          _buildAttachmentsCard(context),
+          //  ],
           const SizedBox(height: 24),
         ],
       ),
@@ -320,11 +320,7 @@ class _OverviewTabState extends State<OverviewTab> {
         ].contains(attachment.format?.toLowerCase());
 
     return InkWell(
-      onTap: () => _downloadFile(
-        context,
-        attachment.secureUrl,
-        fileName,
-      ),
+      onTap: () => _downloadFile(context, attachment.secureUrl, fileName),
       borderRadius: BorderRadius.circular(12),
       child: Container(
         padding: const EdgeInsets.all(12),
@@ -430,15 +426,9 @@ class _OverviewTabState extends State<OverviewTab> {
                   },
                 ),
                 IconButton(
-                  icon: const Icon(
-                    Icons.download_rounded,
-                    size: 18,
-                  ),
-                  onPressed: () => _downloadFile(
-                    context,
-                    attachment.secureUrl,
-                    fileName,
-                  ),
+                  icon: const Icon(Icons.download_rounded, size: 18),
+                  onPressed: () =>
+                      _downloadFile(context, attachment.secureUrl, fileName),
                   tooltip: 'Download file'.tr(),
                 ),
               ],
